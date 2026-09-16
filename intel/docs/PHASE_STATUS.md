@@ -1,17 +1,17 @@
 # INTEL V3 phase status
 
-- Phase 0 audit: COMPLETE. Live entry is `src/entry.ts`; it delegates legacy routes to `src/index.ts`. D1 is directly coupled throughout legacy/modular code. FTS5 exists but synchronization coverage is incomplete. Deploy and migrations are already separated.
-- Phase 1 target architecture/persistence abstraction: IN PROGRESS. Provider-neutral contract, Turso web adapter, request-local DB metrics, architecture rules added.
-- Phase 2 Turso schema/migrations: STARTED. Controlled migration directory created; compatibility/consolidation required before live apply.
-- Phase 3 auth/session migration: PENDING.
+- Phase 0 audit: COMPLETE.
+- Phase 1 target architecture/persistence abstraction: COMPLETE foundation. Provider-neutral contract + Turso adapter + zero-write request metrics are present. Remaining direct D1 calls are tracked migration debt.
+- Phase 2 Turso schema/migrations: BASELINE COMPLETE. Consolidated core schema and hardened deterministic FTS migration created; no live provider apply yet.
+- Phase 3 auth/session migration: IN PROGRESS. Provider-neutral session lookup and AuthRepository added; registration is designed as one atomic batch rather than compensating writes.
 - Phase 4 core data migration: PENDING.
-- Phase 5 search/graph: PENDING.
-- Phase 6 efficiency/cache: PENDING.
+- Phase 5 search/graph: schema foundation complete; route migration pending.
+- Phase 6 efficiency/cache: budgets established; endpoint implementation pending.
 - Phase 7 UI/mobile: PENDING.
-- Phase 8 observability/security: PENDING.
-- Phase 9 testing/capacity: PENDING.
+- Phase 8 observability/security: request metrics foundation present; pending.
+- Phase 9 testing/capacity: initial efficiency test present; pending.
 - Phase 10 deployment prep: PENDING.
 - Phase 11 production verification: PENDING.
 
 ## External gate
-A live Turso database/token is not required until integration verification. Continue repository conversion before asking Titus for provider actions.
+Live Turso credentials are not yet required. Do not commit provider tokens.
