@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "intel-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "9f678576-9b15-47b0-8178-e1d8362772cb",
       "migrations_dir": "migrations"
     }
   ],
