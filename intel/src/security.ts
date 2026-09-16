@@ -1,0 +1,44 @@
+import type { Env, SessionUser } from './types';
+
+const enc = new TextEncoder();
+const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+const b64 = (b: Uint8Array) => btoa(String.fromCharCode(...b));
+const fromB64 = (s: string) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+export const normalizeEmail = (v: string) => v.trim().toLowerCase();
+export const normalizeUsername = (v: string) => v.trim().normalize('NFKC').toLowerCase();
+export const randomId = () => crypto.randomUUID();
+export function randomToken(bytes = 32): string { const b = new Uint8Array(bytes); crypto.getRandomValues(b); return b64(b).replaceAll('+','-').replaceAll('/','_').replaceAll('=',''); }
+export async function sha256(v: string): Promise<string> { return hex(await crypto.subtle.digest('SHA-256', enc.encode(v))); }
+
+export async function hashPassword(password: string, saltB64?: string): Promise<{hash:string;salt:string;params:string}> {
+  const salt = saltB64 ? fromB64(saltB64) : crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const iterations = 310000;
+  const bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt, iterations}, key, 256);
+  return { hash: hex(bits), salt: b64(salt), params: JSON.stringify({iterations, hash:'SHA-256', bits:256}) };
+}
+export async function verifyPassword(password:string, salt:string, expected:string): Promise<boolean> {
+  const actual = (await hashPassword(password, salt)).hash;
+  if (actual.length !== expected.length) return false;
+  let diff = 0; for (let i=0;i<actual.length;i++) diff |= actual.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
+
+export const securityHeaders: Record<string,string> = {
+  'Content-Security-Policy': "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  'Referrer-Policy': 'strict-origin-when-cross-origin', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()', 'Cross-Origin-Opener-Policy': 'same-origin'
+};
+export function withSecurity(response: Response): Response { const h=new Headers(response.headers); Object.entries(securityHeaders).forEach(([k,v])=>h.set(k,v)); return new Response(response.body,{status:response.status,statusText:response.statusText,headers:h}); }
+export function sessionCookie(token:string, maxAge=60*60*24*30): string { return `intel_session=${token}; Path=/; Max-Age=${maxAge}; Secure; HttpOnly; SameSite=Lax`; }
+export const clearSessionCookie = () => 'intel_session=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax';
+export function cookie(request:Request,name:string):string|null { const raw=request.headers.get('Cookie')||''; for(const part of raw.split(';')){const [k,...v]=part.trim().split('='); if(k===name)return v.join('=');} return null; }
+export function validSameOrigin(request:Request, env:Env): boolean { const origin=request.headers.get('Origin'); return !origin || origin===env.APP_ORIGIN; }
+export function isAdmin(id:string, env:Env):boolean { return (env.ADMIN_USER_IDS||'').split(',').map(x=>x.trim()).filter(Boolean).includes(id); }
+
+export async function currentUser(request:Request, env:Env):Promise<SessionUser|null>{
+  const token=cookie(request,'intel_session'); if(!token)return null; const digest=await sha256(`${token}:${env.SESSION_PEPPER}`); const now=Date.now();
+  const row=await env.DB.prepare(`SELECT u.id,u.username,u.status FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.revoked_at IS NULL AND s.expires_at>? LIMIT 1`).bind(digest,now).first<{id:string;username:string;status:SessionUser['status']}>();
+  if(!row || row.status!=='ACTIVE')return null; return {...row,isAdmin:isAdmin(row.id,env)};
+}
