@@ -3,9 +3,9 @@
 - Phase 1: COMPLETE persistence foundation.
 - Phase 2: BASELINE COMPLETE; live Turso apply pending.
 - Phase 3: SUBSTANTIALLY COMPLETE auth/account/session provider-neutral paths.
-- Phase 4: IN PROGRESS. Entity read/create and relationship read/create are now provider-neutral; entity creation+investigation linkage is atomic. Relationship reads reduced from 100 to 50 with stable ordering. Remaining investigations/evidence/community/admin operations are migration debt.
+- Phase 4: IN PROGRESS. Entity graph and evidence metadata operations now use provider-neutral repositories. Evidence metadata+attachment+audit are atomic; failed metadata persistence deletes the newly uploaded R2 object to avoid orphan evidence. Public evidence reads are bounded. Sitemap is provider-neutral.
 - Phase 5: search/graph schema foundation complete; route/search migration pending.
-- Phase 6: efficiency budgets established; implementation progressing with bounded reads.
+- Phase 6: efficiency/cache progressing: bounded entity/evidence reads and explicit public cache headers added.
 - Phase 7: pending.
 - Phase 8: request metrics foundation present; pending.
 - Phase 9: initial tests present; pending.
