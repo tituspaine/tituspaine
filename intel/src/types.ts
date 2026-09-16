@@ -1,7 +1,7 @@
 import type { IntelDatabase } from './db/types';
 
 export interface Env {
-  /** Temporary legacy binding. Remove at the Turso production cutover. */
+  /** Temporary legacy binding. Remove only after the verified Turso production cutover. */
   DB: D1Database;
   EVIDENCE: R2Bucket;
   APP_ORIGIN: string;
@@ -10,6 +10,8 @@ export interface Env {
   TURNSTILE_SECRET_KEY: string;
   SESSION_PEPPER: string;
   ADMIN_USER_IDS?: string;
+  /** Defaults to d1. Set to turso only at the explicit, verified cutover gate. */
+  PERSISTENCE_PROVIDER?: 'd1'|'turso';
   TURSO_DATABASE_URL?: string;
   TURSO_AUTH_TOKEN?: string;
 }
@@ -26,6 +28,6 @@ export interface RequestContext {
   env: Env;
   url: URL;
   user: SessionUser | null;
-  /** V3 provider-neutral persistence handle; populated as routes migrate. */
-  db?: IntelDatabase;
+  /** Provider-neutral persistence handle. */
+  db: IntelDatabase;
 }
