@@ -3,6 +3,7 @@ export interface Env {
   EVIDENCE: R2Bucket;
   APP_ORIGIN: string;
   ENVIRONMENT: string;
+  TURNSTILE_SITE_KEY: string;
   TURNSTILE_SECRET_KEY: string;
   SESSION_PEPPER: string;
   ADMIN_USER_IDS?: string;
