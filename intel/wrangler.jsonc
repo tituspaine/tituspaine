@@ -1,26 +1,20 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tituspaine-intel",
-  "main": "src/index.ts",
+  "main": "src/entry.ts",
   "compatibility_date": "2026-09-16",
   "workers_dev": true,
+  "assets": { "directory": "public", "run_worker_first": false },
   "vars": {
     "APP_ORIGIN": "https://intel.tituspaine.com",
     "ENVIRONMENT": "production",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAE4y25YkssM9TbSp"
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "intel-db",
-      "database_id": "9f678576-9b15-47b0-8178-e1d8362772cb",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "EVIDENCE",
-      "bucket_name": "intel-evidence"
-    }
-  ]
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "intel-db",
+    "database_id": "9f678576-9b15-47b0-8178-e1d8362772cb",
+    "migrations_dir": "migrations"
+  }],
+  "r2_buckets": [{ "binding": "EVIDENCE", "bucket_name": "intel-evidence" }]
 }
