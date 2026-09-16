@@ -28,6 +28,6 @@ export interface RequestContext {
   env: Env;
   url: URL;
   user: SessionUser | null;
-  /** Entry supplies this for V3 routes; optional only while legacy index.ts still constructs its own contexts. */
-  db?: IntelDatabase;
+  /** Every request entering the V3 router receives one provider-selected database handle. */
+  db: IntelDatabase;
 }
