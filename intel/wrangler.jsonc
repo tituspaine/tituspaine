@@ -6,7 +6,8 @@
   "workers_dev": true,
   "vars": {
     "APP_ORIGIN": "https://intel.tituspaine.com",
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAE4y25YkssM9TbSp"
   },
   "d1_databases": [
     {
