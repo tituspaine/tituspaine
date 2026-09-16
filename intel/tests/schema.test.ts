@@ -1,16 +1,16 @@
 import { describe,it,expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 
-const core=readFileSync(new URL('../migrations/0001_core.sql',import.meta.url),'utf8');
-const search=readFileSync(new URL('../migrations/0002_search_roles.sql',import.meta.url),'utf8');
+const core=readFileSync(new URL('../migrations-turso/0001_core.sql',import.meta.url),'utf8');
+const search=readFileSync(new URL('../migrations-turso/0002_search.sql',import.meta.url),'utf8');
 
-describe('database invariants',()=>{
- it('has no user-editable comment update/delete trigger or revision table',()=>{
-   expect(core).toContain('CREATE TABLE comments');
-   expect(core).not.toMatch(/comment_revisions|edited_at/i);
- });
- it('enforces one same-category report per account/comment',()=>expect(core).toContain('UNIQUE(comment_id, reporter_user_id, category)'));
- it('indexes threshold evaluation',()=>expect(core).toContain('idx_reports_threshold'));
- it('uses FTS for production corpus search',()=>expect(search).toContain('CREATE VIRTUAL TABLE search_index USING fts5'));
- it('keeps admin capability in server-side data model',()=>expect(search).toContain("role IN ('ADMIN','MODERATOR','PUBLISHER')"));
+describe('V3 production database invariants',()=>{
+ it('makes published comments immutable',()=>{expect(core).toContain('CREATE TRIGGER comments_no_content_update');expect(core).toContain('CREATE TRIGGER comments_no_delete');});
+ it('caps reply depth in the database',()=>expect(core).toContain('CHECK(depth BETWEEN 0 AND 8)'));
+ it('enforces one same-category report per account/comment',()=>expect(core).toContain('UNIQUE(comment_id,reporter_user_id,category)'));
+ it('indexes report threshold evaluation',()=>expect(core).toContain('idx_reports_threshold'));
+ it('keeps roles server-side',()=>expect(core).toContain("role IN('ADMIN','MODERATOR','PUBLISHER')"));
+ it('uses FTS5 for the production corpus',()=>expect(search).toContain('CREATE VIRTUAL TABLE search_index USING fts5'));
+ it('keeps entity search one row per entity',()=>{expect(search).toContain("SELECT 'ENTITY',e.id,NULL");expect(search).not.toContain("SELECT 'ENTITY',e.id,ie.investigation_id");});
+ it('synchronizes mutable searchable objects',()=>{expect(search).toContain('CREATE TRIGGER search_update_update');expect(search).toContain('CREATE TRIGGER search_evidence_update');expect(search).toContain('CREATE TRIGGER search_alias_delete');});
 });
