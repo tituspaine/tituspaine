@@ -28,6 +28,6 @@ export interface RequestContext {
   env: Env;
   url: URL;
   user: SessionUser | null;
-  /** Provider-neutral persistence handle. */
-  db: IntelDatabase;
+  /** Entry supplies this for V3 routes; optional only while legacy index.ts still constructs its own contexts. */
+  db?: IntelDatabase;
 }
