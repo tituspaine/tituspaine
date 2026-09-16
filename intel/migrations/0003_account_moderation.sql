@@ -1,6 +1,5 @@
 PRAGMA foreign_keys = ON;
 
-ALTER TABLE users ADD COLUMN deactivated_at INTEGER;
 ALTER TABLE users ADD COLUMN username_changed_at INTEGER;
 
 CREATE TABLE user_preferences (
