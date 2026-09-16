@@ -1,7 +1,7 @@
 {
   "name": "tituspaine-intel",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
@@ -9,8 +9,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:local": "wrangler d1 migrations apply intel-db --local",
-    "db:remote": "wrangler d1 migrations apply intel-db --remote"
+    "db:legacy:local": "wrangler d1 migrations apply intel-db --local",
+    "db:legacy:remote": "wrangler d1 migrations apply intel-db --remote"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.15.15"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "latest",
