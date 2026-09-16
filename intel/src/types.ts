@@ -28,6 +28,6 @@ export interface RequestContext {
   env: Env;
   url: URL;
   user: SessionUser | null;
-  /** Every request entering the V3 router receives one provider-selected database handle. */
-  db: IntelDatabase;
+  /** V3 entry supplies this. Optional only until legacy index.ts stops constructing its own contexts. */
+  db?: IntelDatabase;
 }
