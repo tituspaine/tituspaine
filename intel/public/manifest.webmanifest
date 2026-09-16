@@ -1,0 +1,10 @@
+{
+  "name": "INTEL.TITUSPAINE.COM",
+  "short_name": "INTEL",
+  "description": "Living public investigations, evidence, sources, and discussion.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}
