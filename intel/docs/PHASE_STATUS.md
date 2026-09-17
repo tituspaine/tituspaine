@@ -43,4 +43,4 @@ CI runs TypeScript typecheck and Vitest on every branch change. The suite includ
 5. Keep R2 binaries out of Turso.
 6. Keep private responses out of shared caches.
 7. Preserve server-side authorization even when UI controls are hidden.
-8. Keep `intel.orendrix.com` and its automated ingestion responsibilities separate; never add automated ingestion to this INTEL build.\n9. Keep Terms of Service, Terms of Use, Acceptable Use, and future privacy/legal disclosures synchronized with actual product behavior and obtain qualified legal review before monetization or material expansion.
+8. Keep `intel.orendrix.com` and its automated ingestion responsibilities separate; never add automated ingestion to this INTEL build.\n9. Keep Terms of Service, Terms of Use, Acceptable Use, and future privacy/legal disclosures synchronized with actual product behavior.
