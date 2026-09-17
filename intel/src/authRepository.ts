@@ -1,8 +1,8 @@
 import type { IntelDatabase } from './db/types';
-export interface AuthIdentity{id:string;status:string;password_hash:string;password_salt:string}
+export interface AuthIdentity{id:string;status:string;password_hash:string;password_salt:string;kdf_params:string}
 export class AuthRepository{
  constructor(private db:IntelDatabase){}
- findIdentity(email:string){return this.db.first<AuthIdentity>('SELECT u.id,u.status,cr.password_hash,cr.password_salt FROM users u JOIN user_credentials cr ON cr.user_id=u.id WHERE u.email_norm=? LIMIT 1',[email]);}
+ findIdentity(email:string){return this.db.first<AuthIdentity>('SELECT u.id,u.status,cr.password_hash,cr.password_salt,cr.kdf_params FROM users u JOIN user_credentials cr ON cr.user_id=u.id WHERE u.email_norm=? LIMIT 1',[email]);}
  findRegistrationCollision(email:string,usernameNorm:string){return this.db.first<{id:string}>('SELECT id FROM users WHERE email_norm=? OR username_norm=? LIMIT 1',[email,usernameNorm]);}
  createAccount(v:{id:string;email:string;username:string;usernameNorm:string;hash:string;salt:string;params:string;sessionId:string;tokenHash:string;now:number}){return this.db.batch([
   {sql:'INSERT INTO users(id,email_norm,username,username_norm,status,created_at) VALUES(?,?,?,?,?,?)',args:[v.id,v.email,v.username,v.usernameNorm,'ACTIVE',v.now]},
