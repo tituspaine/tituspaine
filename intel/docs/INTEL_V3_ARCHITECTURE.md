@@ -1,16 +1,38 @@
-# INTEL V3 target architecture
+# INTEL V3 production architecture
+
+## Scope
+`intel.tituspaine.com` is a community intelligence and investigation network. `intel.orendrix.com` is a separate Orendrix automated ingestion/intelligence machine. They are not the same product and must not share roadmaps by assumption.
 
 ## Principle
-Simple outside; sophisticated inside. Minimize infrastructure work per user action without reducing intelligence capability.
+Simple outside; sophisticated inside. INTEL exposes fast feeds, investigations, discussion and evidence while preserving structured provenance, graph context and accountability underneath.
 
 ## Runtime
-Cloudflare Worker/API + Assets + Turnstile + edge cache. R2 owns binary evidence/media. Turso/libSQL owns relational state. Browser owns ephemeral UI state. No production feature depends on an LLM.
+Cloudflare Worker/API + static Assets + Turnstile + safe edge caching. R2 owns binary evidence/media. Turso/libSQL owns relational state. Browser state is ephemeral. No production feature depends on an LLM. The frontend is server-rendered semantic HTML/CSS with minimal JavaScript.
 
 ## Persistence boundary
-Domain/routes -> `IntelDatabase` -> provider adapter -> Turso. Direct provider calls outside `src/db` are migration debt and must be removed phase-by-phase. Future PostgreSQL migration replaces the adapter rather than application behavior.
+Domain/routes -> `IntelDatabase` -> Turso adapter -> libSQL. Production is Turso-only. D1 has no runtime adapter, binding, provider switch, fallback or package script. R2 is the only binary evidence store.
 
-## Efficiency rules
-No query-on-hover; no writes for navigation/filter state; no unbounded reads; cursor pagination for growing collections; batch screen reads; cache safe public responses; lazy-load secondary data; counters instead of repeated full counts where consistency rules permit; R2 instead of DB blobs; no telemetry system that writes per request to Turso.
+## Community model
+An investigation creator is an `OWNER` and follows their investigation automatically. Owners may grant/revoke `MODERATOR` only to followers. Self-promotion is rejected. Owners cannot be demoted through moderator controls. Owner/moderator authority is investigation-scoped and checked server-side. Administrators retain separate global moderation/publishing authority.
 
-## Production migration gate
-D1 stays bound only while legacy calls are being converted. It is removed from Wrangler before production cutover. Turso credentials are Worker secrets and never committed.
+Comments support bounded threading, replies, likes, reports, visibility states, permalinks and moderation. Notifications cover replies, investigation contributions, reports, evidence contributions, moderation actions and team changes. Following and notifications are first-class routes rather than dashboard anchors.
+
+## Evidence and provenance
+Community evidence is always created as `UNVERIFIED`. Supported files are bounded to 20 MB and approved MIME types, hashed with SHA-256, stored in R2, and referenced by relational metadata. Optional original source URLs create source records. Evidence pages expose verification state, contributor, source, timestamps, file metadata and hash. Publication does not imply truth.
+
+Entities and relationships remain deterministic. Relationships preserve confidence, verification state, observed/valid time, assertion notes, source/evidence provenance and public permalinks.
+
+## Search
+FTS5 indexes investigations, updates, evidence, entities and relationships. Search is bounded, deterministic, parameterized and type-filterable. Results deep-link to durable server-rendered routes.
+
+## Cache and performance
+Authenticated/private/admin responses are `private, no-store`. Public feeds/search/evidence/entities/relationships/profiles use short bounded shared caching with stale-while-revalidate where safe. Queries project required columns, enforce limits, maintain counters on hot mutations, avoid polling/query-on-hover and keep telemetry out of the primary database. Request DB metrics are in-memory only.
+
+## Security
+Passwords use PBKDF2-SHA256 with stored salt/parameters; sessions store peppered SHA-256 token digests and have expiry/revocation. Cookies are Secure, HttpOnly and SameSite=Lax. Mutating routes enforce same-origin checks. Registration uses Turnstile. Per-isolate rate limiting is defense-in-depth for auth, search, writes and evidence; Cloudflare edge controls remain the preferred outer layer. CSP, frame denial, MIME sniff protection, referrer policy and permissions policy are applied globally.
+
+## Operations
+Production schema is migrated through `0005_investigation_teams`. The former browser migration console is removed. `src/tursoProduction.ts` retains the pinned explicit migration/validation implementation for controlled future maintenance but is not publicly routed. Owner system health uses bounded reads of migration/security/audit state and intentionally avoids per-request analytics writes.
+
+## Navigation
+Core navigation uses native links/forms and durable URLs. Mobile primary navigation is Home / Following / Notifications / Account. Investigation, comment, evidence, entity, relationship and profile content have direct deep links. There is no SPA router or client-side history dependency.
