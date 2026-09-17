@@ -1,7 +1,7 @@
 import type { IntelDatabase } from './db/types';
 
 export interface Env {
-  /** Temporary legacy binding. Remove only after the verified Turso production cutover. */
+  /** Temporary D1 adapter/binding retained until the verified Turso production cutover. */
   DB: D1Database;
   EVIDENCE: R2Bucket;
   APP_ORIGIN: string;
@@ -28,6 +28,6 @@ export interface RequestContext {
   env: Env;
   url: URL;
   user: SessionUser | null;
-  /** V3 entry supplies this. Optional only until legacy index.ts stops constructing its own contexts. */
-  db?: IntelDatabase;
+  /** Every live V3 request receives exactly one provider-neutral database context at entry. */
+  db: IntelDatabase;
 }
