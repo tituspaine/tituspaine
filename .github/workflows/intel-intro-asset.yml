@@ -15,7 +15,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: intel-v2-build
-      - name: Convert MP4 to animated WebP
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Convert MP4 to animated GIF
         run: |
           ffmpeg -y -i intel/public/intel_intro_animation.mp4 -vf 'fps=20,scale=512:-2:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=sierra2_4a' -loop 0 intel/public/intel_intro_animation.gif
       - name: Commit generated intro asset
