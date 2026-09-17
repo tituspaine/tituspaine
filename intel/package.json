@@ -1,16 +1,14 @@
 {
   "name": "tituspaine-intel",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "db:legacy:local": "wrangler d1 migrations apply intel-db --local",
-    "db:legacy:remote": "wrangler d1 migrations apply intel-db --remote"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@libsql/client": "^0.15.15"
