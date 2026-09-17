@@ -14,8 +14,12 @@ export interface Env {
   TURSO_VALIDATION_BOOTSTRAP_TOKEN?: string;
   /** Defaults to d1. Set to turso only at the explicit, verified cutover gate. */
   PERSISTENCE_PROVIDER?: 'd1'|'turso';
+  /** Validation/current provider credentials. Never repoint these during production provisioning. */
   TURSO_DATABASE_URL?: string;
   TURSO_AUTH_TOKEN?: string;
+  /** Isolated production credentials used only by the pre-cutover production migration/validation gate. */
+  TURSO_PRODUCTION_DATABASE_URL?: string;
+  TURSO_PRODUCTION_AUTH_TOKEN?: string;
 }
 
 export interface SessionUser {
