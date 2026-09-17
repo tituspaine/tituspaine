@@ -1,0 +1,28 @@
+name: Build INTEL intro asset
+on:
+  push:
+    branches: [intel-v2-build]
+    paths:
+      - 'intel/public/intel_intro_animation.mp4'
+      - '.github/workflows/intel-intro-asset.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: intel-v2-build
+      - name: Convert MP4 to animated WebP
+        run: |
+          ffmpeg -y -i intel/public/intel_intro_animation.mp4 -vf "fps=24,scale=512:-2:flags=lanczos" -loop 0 -c:v libwebp_anim -lossless 0 -q:v 78 -compression_level 6 intel/public/intel_intro_animation.webp
+      - name: Commit generated intro asset
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add intel/public/intel_intro_animation.webp
+          git diff --cached --quiet && exit 0
+          git commit -m "intel intro: generate autoplay-independent animated WebP"
+          git push origin HEAD:intel-v2-build
