@@ -1,52 +1,53 @@
-# INTEL Worker
+# INTEL community intelligence platform
 
-Separate Cloudflare Worker application for `https://intel.tituspaine.com`. It intentionally does not modify or replace the root `tituspaine` Worker configuration.
+`https://intel.tituspaine.com` is the community intelligence / investigation platform. It is separate from `intel.orendrix.com`, which is an Orendrix automated ingestion/intelligence system and is not part of this repository build.
 
-## Local/repository validation
+## Production architecture
+
+- Cloudflare Worker: `tituspaine-intel`
+- Production branch: `intel-v2-build`
+- Custom domain: `intel.tituspaine.com`
+- Relational state: Turso/libSQL production database
+- Binary evidence: Cloudflare R2 bucket `intel-evidence`, binding `EVIDENCE`
+- Human verification: Cloudflare Turnstile
+- UI: server-rendered semantic HTML/CSS; JavaScript is intentionally minimal and currently used for password visibility controls and Turnstile.
+- No production LLM dependency.
+- No D1 runtime dependency, fallback, binding, adapter, provider switch, or D1 deployment script.
+
+## Required Worker configuration
+
+Encrypted secrets/variables are managed outside git. Required production configuration includes `TURSO_PRODUCTION_DATABASE_URL`, `TURSO_PRODUCTION_AUTH_TOKEN`, `SESSION_PEPPER`, `TURNSTILE_SECRET_KEY`, and `ADMIN_USER_IDS` where owner/admin access is required. Never commit secret values.
+
+Versioned non-secret configuration includes `APP_ORIGIN=https://intel.tituspaine.com`, `ENVIRONMENT=production`, the Turnstile site key, and the R2 binding.
+
+## Validation
 
 ```bash
 cd intel
 npm install
 npm run typecheck
 npm test
-npx wrangler d1 migrations apply intel-db --local
 npm run dev
 ```
 
-## Required Cloudflare resources
+CI performs typecheck and tests on branch changes. Deployment is intentionally separate from schema migration.
 
-Exact production names/bindings:
+## Turso migrations
 
-- Worker: `tituspaine-intel`
-- Custom domain: `intel.tituspaine.com`
-- D1 database: `intel-db`, Worker binding `DB`
-- R2 bucket: `intel-evidence`, Worker binding `EVIDENCE`
-- Secret: `SESSION_PEPPER`
-- Secret: `TURNSTILE_SECRET_KEY`
-- Variable/secret: `ADMIN_USER_IDS` after the Titus account is created
-- Plain vars already versioned: `APP_ORIGIN=https://intel.tituspaine.com`, `ENVIRONMENT=production`
+Production schema is applied through `0005_investigation_teams.sql`. Production validation verified migration tracking, investigation team schema, atomic graph writes, relationship FTS, provenance, transaction rollback, and cleanup.
 
-After D1 creation, replace `REPLACE_WITH_D1_DATABASE_ID` in `intel/wrangler.jsonc` with the returned database UUID and commit that non-secret ID to this branch.
+`src/tursoProduction.ts` retains the explicit pinned migration/validation implementation for future controlled maintenance. It is deliberately not exposed as a public application route. Future migrations must be reviewed, pinned to an immutable repository commit, applied explicitly, validated, and only then followed by application code that requires the new schema.
 
-## Production commands
+## Product surfaces
 
-```bash
-cd intel
-npm ci
-npm run typecheck
-npm test
-npx wrangler d1 migrations apply intel-db --remote
-npx wrangler secret put SESSION_PEPPER
-npx wrangler secret put TURNSTILE_SECRET_KEY
-npx wrangler deploy
-```
+INTEL provides public/authenticated feeds, investigations, following, threaded discussion, reactions, reports, investigation OWNER/MODERATOR teams, community evidence submission, R2-backed evidence files, source/provenance context, corrections, entities, relationships, deterministic FTS search, profiles, notifications, account/authentication, scoped moderation, admin publishing/tools/export, and a bounded owner system-health view.
 
-Create `SESSION_PEPPER` as at least 32 cryptographically random bytes (64 hexadecimal characters is appropriate). Do not commit it.
+Community evidence enters as `UNVERIFIED`; publication in INTEL is not itself verification. Authorization is enforced server-side. Public routes may use short shared caching; authenticated/private/admin routes are no-store.
 
-Turnstile must be configured for `intel.tituspaine.com`; place its secret key in `TURNSTILE_SECRET_KEY`. The public site key will be added to the registration UI once provisioned.
+## Scope boundary
 
-Create the first Titus account through normal registration, obtain its immutable user ID from D1, then set `ADMIN_USER_IDS` to that UUID and redeploy. Admin authorization is server-side and never inferred from username/email.
+`intel.tituspaine.com` = community intelligence / investigation platform.
 
-## Custom domain
+`intel.orendrix.com` = separate Orendrix automated ingestion/intelligence system.
 
-In Cloudflare Workers & Pages, open Worker `tituspaine-intel` → Settings → Domains & Routes → Add → Custom Domain → enter exactly `intel.tituspaine.com`. Cloudflare should create/manage the required DNS route in the same zone. Do not add this hostname to the existing `tituspaine` Worker.
+Never conflate their responsibilities, databases, deployment paths, or roadmaps.
