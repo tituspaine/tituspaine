@@ -1,19 +1,22 @@
 # INTEL V3 phase status
-- Phase 0: COMPLETE audit; repository ref integrity re-verified after the V3 commit chain was attached to `intel-v2-build`.
-- Phase 1: COMPLETE persistence foundation, now with both D1 and Turso adapters behind `IntelDatabase`. Runtime defaults to D1; Turso requires explicit `PERSISTENCE_PROVIDER=turso` plus both secrets. This prevents accidental split-state cutover.
-- Phase 2: BASELINE COMPLETE; live Turso apply pending. Search migration refined to one FTS row per entity with update/delete synchronization. It has not been applied remotely.
-- Phase 3: SUBSTANTIALLY COMPLETE auth/account/session provider-neutral paths. Entry now supplies a provider-neutral DB on every request while legacy core remains compatible.
-- Phase 4: IN PROGRESS. Entity graph, evidence, investigation reads, core community interactions, update likes, moderation queue/resolution, and portable export have provider-neutral paths. Remaining debt: report threshold workflow, admin investigation/update publishing, notifications, corrections/public-record admin paths, then route cutover.
-- Phase 5: search/graph schema foundation complete; route/search migration pending.
-- Phase 6: efficiency active; bounded reads, explicit projections and counter reconciliation are used on migrated hot paths.
-- Phase 7: pending.
-- Phase 8: request metrics foundation present; pending.
-- Phase 9: verification active. CI exposed a repository typing defect and legacy-context compatibility issue during this checkpoint; both were corrected. Production-schema and same-origin regression tests were strengthened. A green CI run is required before this checkpoint is considered closed.
+- Phase 0: COMPLETE — actual repository/runtime audit established `src/entry.ts` as the Worker entry and documented the legacy D1 architecture.
+- Phase 1: COMPLETE — `IntelDatabase` persistence boundary with D1 and Turso/libSQL adapters. Provider selection remains explicit; production still defaults to D1.
+- Phase 2: BASELINE COMPLETE — fresh Turso/libSQL core and FTS migrations exist and are regression-tested statically. They have NOT been applied to a remote database yet.
+- Phase 3: COMPLETE — auth/account/session paths are provider-neutral and the live router creates one database context per request.
+- Phase 4: COMPLETE — all live application routes are provider-neutral. Admin investigation creation and update publishing are repository-backed; publishing content/counter/audit changes is atomic, and follower notification fan-out uses the known update ID instead of a post-request latest-row lookup. Dashboard, comment permalinks and evidence metadata were extracted. `core.fetch()` was eliminated and retired `src/index.ts` deleted after its routes were replaced. `RequestContext.db` is strict again. The only D1-specific runtime code intentionally retained is the D1 provider adapter/binding used while production remains on D1.
+- Phase 5: IN PROGRESS — unified FTS route is live and entity relationships/aliases/provenance schema foundation exists. Next gate is validation against real Turso/libSQL, then graph/provenance refinement.
+- Phase 6: efficiency work active; bounded reads and explicit projections are standard on migrated paths. Full hot-path/caching pass follows Phase 5 validation.
+- Phase 7: pending full mobile/professional UI refinement.
+- Phase 8: request DB metrics foundation present; security/abuse/observability pass pending.
+- Phase 9: verification active. The post-legacy-removal checkpoint passed typecheck and automated tests in CI.
 - Phase 10: pending.
 - Phase 11: pending.
 
+## Turso validation gate
+The codebase has reached the external-account gate. Create/connect a free Turso account and a non-production validation database. Do not set production `PERSISTENCE_PROVIDER=turso`, do not remove the D1 binding, and do not point `intel.tituspaine.com` at Turso yet. The first remote use is validation only: apply the V3 migrations to an empty validation database, verify transaction behavior, FTS5/search triggers, schema constraints and the web adapter, then fix any incompatibilities before a cutover plan is approved.
+
 ## Stabilization rules
-- Do not set `PERSISTENCE_PROVIDER=turso` until every production route that must share state is migrated and Turso migrations/data are verified.
-- Do not remove the D1 binding yet; legacy `index.ts`, notifications, corrections and admin tools still use it directly.
-- Do not apply `migrations-turso` remotely until the migration suite and CI are green.
-- Never commit provider tokens.
+- Production remains on D1 until remote Turso validation and a separate verified data/cutover plan are complete.
+- Keep the D1 adapter/binding as rollback capability until Phase 11 verifies Turso production operation.
+- Never commit database URLs containing credentials, auth tokens, session peppers or Turnstile secrets.
+- Orendrix Properties is outside this project and must not be modified.
