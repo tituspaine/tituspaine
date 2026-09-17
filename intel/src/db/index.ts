@@ -9,8 +9,12 @@ export function databaseForRequest(env:Env):RequestDatabase {
   const metrics=new RequestDbMetrics();
   const provider=env.PERSISTENCE_PROVIDER==='turso'?'turso':'d1';
   if(provider==='turso'){
-    if(!env.TURSO_DATABASE_URL || !env.TURSO_AUTH_TOKEN) throw new Error('Turso persistence selected but credentials are not configured');
-    return {db:createTursoDatabase(env.TURSO_DATABASE_URL,env.TURSO_AUTH_TOKEN,metrics),metrics,provider};
+    /* Production cutover deliberately uses the separately provisioned and validated
+       production credentials. Validation credentials remain isolated until retired. */
+    const url=env.TURSO_PRODUCTION_DATABASE_URL;
+    const token=env.TURSO_PRODUCTION_AUTH_TOKEN;
+    if(!url || !token) throw new Error('Turso persistence selected but production credentials are not configured');
+    return {db:createTursoDatabase(url,token,metrics),metrics,provider};
   }
   if(!env.DB) throw new Error('Legacy D1 persistence is not configured');
   return {db:createD1Database(env.DB,metrics),metrics,provider};
