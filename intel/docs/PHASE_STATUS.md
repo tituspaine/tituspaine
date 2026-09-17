@@ -1,7 +1,7 @@
 # INTEL V3 completion status
 
 ## Scope
-`intel.tituspaine.com` is the community intelligence / investigation platform. `intel.orendrix.com` is a separate Orendrix automated ingestion/intelligence system. This build does not include or modify Orendrix.
+`intel.tituspaine.com` is the community intelligence / investigation platform. `intel.orendrix.com` is a separate Orendrix automated ingestion/intelligence system. This build does not include or modify Orendrix. Automated ingestion/intelligence-engine work is permanently excluded from this INTEL build.
 
 ## Completed architecture
 - Cloudflare Worker `tituspaine-intel` serves the application and static assets.
@@ -17,7 +17,7 @@ Production migrations `0001_core`, `0002_search`, `0003_graph_provenance`, `0004
 The browser-accessible bootstrap/migration console was removed after cutover. `src/tursoProduction.ts` remains as an explicit pinned operational migration/validation implementation for future controlled maintenance and is not publicly routed.
 
 ## Product state
-Implemented surfaces include public/authenticated home, universal FTS search with real filters, investigation creation/following, threaded discussion/replies/likes/reports, investigation OWNER/MODERATOR teams, scoped moderation, community evidence submission, R2 evidence files, evidence verification/source/provenance presentation, entities, relationship permalinks, corrections, public profiles, dedicated Following, dedicated Notifications, account/authentication, admin publishing/tools/export/moderation, and bounded owner System Health.
+Implemented surfaces include public/authenticated home, universal FTS search with real filters, investigation creation/following, threaded discussion/replies/likes/reports, investigation OWNER/MODERATOR teams, scoped moderation, community evidence submission, R2 evidence files, evidence verification/source/provenance presentation, entities, relationship permalinks, corrections, public profiles, dedicated Following, dedicated Notifications, account/authentication, admin publishing/tools/export/moderation, and bounded owner System Health, a mixed recent-activity feed, individual notification read/deep-link behavior, public evidence contributions on profiles, Terms of Service, Terms of Use, and Acceptable Use Policy.
 
 Mobile primary navigation is Home / Following / Notifications / Account. Core navigation is server-rendered/native, so direct URLs, refresh and browser history do not depend on SPA state.
 
@@ -43,4 +43,4 @@ CI runs TypeScript typecheck and Vitest on every branch change. The suite includ
 5. Keep R2 binaries out of Turso.
 6. Keep private responses out of shared caches.
 7. Preserve server-side authorization even when UI controls are hidden.
-8. Keep `intel.orendrix.com` and its automated ingestion responsibilities separate.
+8. Keep `intel.orendrix.com` and its automated ingestion responsibilities separate; never add automated ingestion to this INTEL build.\n9. Keep Terms of Service, Terms of Use, Acceptable Use, and future privacy/legal disclosures synchronized with actual product behavior and obtain qualified legal review before monetization or material expansion.
