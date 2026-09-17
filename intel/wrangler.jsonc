@@ -8,7 +8,6 @@
   "vars": {
     "APP_ORIGIN": "https://intel.tituspaine.com",
     "ENVIRONMENT": "production",
-    "PERSISTENCE_PROVIDER": "turso",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAE4y25YkssM9TbSp"
   },
   "r2_buckets": [{ "binding": "EVIDENCE", "bucket_name": "intel-evidence" }]
