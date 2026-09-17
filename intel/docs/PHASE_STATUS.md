@@ -1,52 +1,46 @@
-# INTEL V3 phase status
+# INTEL V3 completion status
 
-- Phase 0: COMPLETE — actual repository/runtime audit established `src/entry.ts` as the Worker entry and documented legacy D1.
-- Phase 1: COMPLETE — provider-neutral `IntelDatabase` boundary with D1 rollback adapter and Turso/libSQL adapter.
-- Phase 2: COMPLETE/VALIDATED — Turso migrations 0001–0004 have been applied and remotely validated against `intel-v3-validation`; latest successful validation Run ID `bee3b4c0-aa3d-42f3-bbfe-f865ddd679f2`.
-- Phase 3: COMPLETE — auth/account/session paths are provider-neutral. Registration is atomic, passwords use PBKDF2-SHA256, session tokens are random and only peppered SHA-256 digests are stored.
-- Phase 4: COMPLETE — live application routes use repositories/provider-neutral DB context. D1 remains only as explicit pre-cutover rollback provider.
-- Phase 5: COMPLETE FOR PRODUCTION GATE — graph supports temporal relationships, confidence/verification, multiple source/evidence provenance records, relationship FTS, expanded entity kinds, aliases, deterministic bounded candidate resolution and merge-history schema. No automatic entity merging.
-- Phase 6: COMPLETE FOR PRODUCTION GATE — hot mutations use atomic maintained counters instead of repeated COUNT reconciliation; public anonymous paths avoid user-state subqueries; reads are bounded/projected; search uses bounded FTS; public cache classes are explicit.
-- Phase 7: COMPLETE FOR PRODUCTION GATE — primary UX is server-rendered semantic HTML/native forms. Global INTEL client JS/service worker layers were removed; Turnstile remains the intentional registration exception.
-- Phase 8: COMPLETE FOR PRODUCTION GATE — request DB metrics exist; cheap pre-DB per-isolate burst limits cover auth/search/writes/evidence. This is defense-in-depth, not a globally consistent quota; Cloudflare edge rate limiting remains the preferred future global layer if available free.
-- Phase 9: COMPLETE FOR PRODUCTION GATE — CI typecheck/tests run on every branch change; remote Turso validation proved migrations, FTS, graph/provenance, extended entity kinds, transaction rollback and cleanup.
-- Phase 10: READY FOR EXTERNAL PRODUCTION TURSO PROVISIONING.
-- Phase 11: BLOCKED on production database/account configuration and live cutover verification.
+## Scope
+`intel.tituspaine.com` is the community intelligence / investigation platform. `intel.orendrix.com` is a separate Orendrix automated ingestion/intelligence system. This build does not include or modify Orendrix.
 
-## Remote Turso validation evidence
-Validated migrations: `0001_core`, `0002_search`, `0003_graph_provenance`, `0004_entity_kinds_search`.
-Validated behavior: schema migration tracking, FTS5, atomic graph write, relationship→evidence provenance, ADDRESS entity constraint, relationship FTS, atomic rollback, cleanup.
-Validation database is disposable/non-production and MUST NOT be reused as production.
+## Completed architecture
+- Cloudflare Worker `tituspaine-intel` serves the application and static assets.
+- Turso/libSQL is the sole production relational database.
+- Cloudflare R2 `intel-evidence` stores evidence binaries.
+- Turnstile protects registration.
+- Production functionality has no LLM dependency.
+- D1 runtime code, types, provider switches, scripts and binding are removed.
 
-## Production cutover sequence
-1. Create a separate production Turso database on the free plan.
-2. Configure its URL/token as encrypted Worker secrets; never commit token material.
-3. Apply the same pinned migrations and run production-safe validation before traffic cutover.
-4. Bootstrap the owner/admin identity securely.
-5. Set `PERSISTENCE_PROVIDER=turso` only after production validation.
-6. Verify auth, permissions, graph, evidence, search, community, moderation, navigation, caching and DB usage.
-7. Keep D1 bound but unused for a short rollback window.
-8. Remove validation bootstrap page/routes and `TURSO_VALIDATION_BOOTSTRAP_TOKEN`.
-9. Remove D1 binding/runtime adapter only after Turso stability is proven.
-10. Verify Worker operates with zero D1 bindings, then archive/delete only the INTEL D1 database. Never alter Orendrix.
+## Schema and migration state
+Production migrations `0001_core`, `0002_search`, `0003_graph_provenance`, `0004_entity_kinds_search`, and `0005_investigation_teams` are applied. Production validation passed migration tracking, investigation team schema, atomic graph write, relationship FTS, relationship provenance, atomic batch rollback and cleanup. Successful production validation Run ID recorded during cutover: `297c409e-07ae-4ddd-9cf2-416cbdd18e4f`.
 
-## Current Turso free capacity baseline (checked 2026-09-17)
-Official Turso pricing currently lists Free: 100 databases, 5 GB storage, 500 million rows read/month, 10 million rows written/month, 3 GB monthly syncs, 1-day point-in-time restore. Capacity planning assumes no paid overages.
+The browser-accessible bootstrap/migration console was removed after cutover. `src/tursoProduction.ts` remains as an explicit pinned operational migration/validation implementation for future controlled maintenance and is not publicly routed.
 
-### INTEL planning envelope
-The dominant risk is rows read, not storage, if pages repeatedly scan/count. Current architecture therefore uses FTS, bounded projections, maintained counters and shared caching for anonymous public pages.
+## Product state
+Implemented surfaces include public/authenticated home, universal FTS search with real filters, investigation creation/following, threaded discussion/replies/likes/reports, investigation OWNER/MODERATOR teams, scoped moderation, community evidence submission, R2 evidence files, evidence verification/source/provenance presentation, entities, relationship permalinks, corrections, public profiles, dedicated Following, dedicated Notifications, account/authentication, admin publishing/tools/export/moderation, and bounded owner System Health.
 
-Approximate normal-use model (engineering budget, not a provider guarantee):
-- 1,000 DAU × 20 dynamic requests/day × ~20 rows read/request ≈ 12M rows read/month.
-- 5,000 DAU × 20 × ~20 ≈ 60M rows read/month.
-- 10,000 DAU × 20 × ~20 ≈ 120M rows read/month.
-- At 10,000 DAU, even 40 requests/day × 30 rows/request ≈ 360M rows read/month, below 500M but with much less safety margin.
-- Writes budget: 10,000 DAU × 5 user mutations/day × ~3 relational rows/mutation ≈ 4.5M rows written/month. Evidence binaries remain in R2, not relational storage.
+Mobile primary navigation is Home / Following / Notifications / Account. Core navigation is server-rendered/native, so direct URLs, refresh and browser history do not depend on SPA state.
 
-Public Cloudflare caching can materially reduce anonymous DB reads; authenticated traffic is intentionally private/no-store. Capacity must be measured from live request DB metrics after cutover and revisited before sustained traffic approaches 70% of any free allowance.
+## Security and abuse controls
+Sessions use random tokens with peppered SHA-256 digests, expiry and revocation. Passwords use PBKDF2-SHA256 with per-password salt/parameters. Cookies are Secure/HttpOnly/SameSite=Lax. Server-side authorization protects admin and investigation roles. Same-origin validation protects mutations. Turnstile protects registration. Cheap pre-DB rate limits cover auth, search, writes and evidence. Global security headers include CSP, frame denial, MIME sniff protection, referrer policy and restrictive permissions policy.
 
-## Stabilization rules
-- Production remains on D1 until the separate production Turso database is validated and the explicit cutover occurs.
-- Keep D1 as rollback capability through the live verification window.
-- Never commit Turso auth tokens, session peppers, Turnstile secrets or bootstrap tokens.
-- Orendrix is outside this project and must not be modified.
+Community evidence is always inserted as `UNVERIFIED`; only authorized workflows can assign stronger verification states. Uploads enforce MIME allowlist and 20 MB limit, use sanitized object keys, store SHA-256 metadata, and remove the R2 object if relational publication fails.
+
+## Performance decisions
+Public cacheable pages use short shared TTLs/stale-while-revalidate; user-specific/private/admin pages use no-store. Growing reads are bounded. Search is FTS-backed and bounded. Hot counters avoid repeated COUNT reconciliation. There is no polling, query-on-hover, UI-state persistence or per-request analytics write stream. Request DB metrics remain in memory. The owner health page uses bounded operational reads.
+
+## Capacity engineering envelope
+The design target remains viable for the planned community scale only if live usage stays within provider free allowances. The application therefore emphasizes bounded reads, maintained counters and public caching. Provider quotas must be monitored externally in Cloudflare/Turso because INTEL intentionally does not create an expensive self-telemetry pipeline.
+
+## Verification
+CI runs TypeScript typecheck and Vitest on every branch change. The suite includes schema/migration invariants, auth/security primitives, database contract/metrics, rate limiting, Turso production validation contracts, entity resolution, performance budgets and final completion contracts for Turso-only persistence, community routes, authorization, evidence, navigation and search.
+
+## Maintenance rules
+1. Never merge INTEL changes into `main` merely to deploy this Worker.
+2. Never modify the personal `tituspaine` Worker from INTEL work.
+3. Never reintroduce D1 as a fallback.
+4. Review and pin future Turso migrations to an immutable commit; migrate/validate before deploying code that requires new schema.
+5. Keep R2 binaries out of Turso.
+6. Keep private responses out of shared caches.
+7. Preserve server-side authorization even when UI controls are hidden.
+8. Keep `intel.orendrix.com` and its automated ingestion responsibilities separate.
