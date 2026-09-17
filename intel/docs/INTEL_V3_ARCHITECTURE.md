@@ -22,7 +22,7 @@ Community evidence is always created as `UNVERIFIED`. Supported files are bounde
 
 Entities and relationships remain deterministic. Relationships preserve confidence, verification state, observed/valid time, assertion notes, source/evidence provenance and public permalinks.
 
-## Legal and community rules\nPublic Terms of Service, Terms of Use, and Acceptable Use Policy are durable first-class routes linked throughout the product. Account creation provides conspicuous notice of the 18+ eligibility rule and agreement to the service/use rules. Legal text must remain synchronized with actual platform behavior and should receive qualified legal review before monetization, major geographic expansion, or material product changes.\n\n## Search
+## Legal and community rules\nPublic Terms of Service, Terms of Use, and Acceptable Use Policy are durable first-class routes linked throughout the product. Account creation provides conspicuous notice of the 18+ eligibility rule and agreement to the service/use rules. Legal text must remain synchronized with actual platform behavior.\n\n## Search
 FTS5 indexes investigations, updates, evidence, entities and relationships. Search is bounded, deterministic, parameterized and type-filterable. Results deep-link to durable server-rendered routes.
 
 ## Cache and performance
