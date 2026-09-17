@@ -10,6 +10,8 @@ export interface Env {
   TURNSTILE_SECRET_KEY: string;
   SESSION_PEPPER: string;
   ADMIN_USER_IDS?: string;
+  /** One-time validation bootstrap secret. Remove after Turso validation/cutover. */
+  TURSO_VALIDATION_BOOTSTRAP_TOKEN?: string;
   /** Defaults to d1. Set to turso only at the explicit, verified cutover gate. */
   PERSISTENCE_PROVIDER?: 'd1'|'turso';
   TURSO_DATABASE_URL?: string;
@@ -28,6 +30,6 @@ export interface RequestContext {
   env: Env;
   url: URL;
   user: SessionUser | null;
-  /** Every live V3 request receives exactly one provider-neutral database context at entry. */
+  /** Every normal live V3 request receives exactly one provider-neutral database context at entry. */
   db: IntelDatabase;
 }
