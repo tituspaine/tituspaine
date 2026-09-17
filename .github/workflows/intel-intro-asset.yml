@@ -17,12 +17,12 @@ jobs:
           ref: intel-v2-build
       - name: Convert MP4 to animated WebP
         run: |
-          ffmpeg -y -i intel/public/intel_intro_animation.mp4 -vf "fps=24,scale=512:-2:flags=lanczos" -loop 0 -c:v libwebp_anim -lossless 0 -q:v 78 -compression_level 6 intel/public/intel_intro_animation.webp
+          ffmpeg -y -i intel/public/intel_intro_animation.mp4 -vf 'fps=20,scale=512:-2:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=sierra2_4a' -loop 0 intel/public/intel_intro_animation.gif
       - name: Commit generated intro asset
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add intel/public/intel_intro_animation.webp
+          git add intel/public/intel_intro_animation.gif
           git diff --cached --quiet && exit 0
           git commit -m "intel intro: generate autoplay-independent animated WebP"
           git push origin HEAD:intel-v2-build
