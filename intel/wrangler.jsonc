@@ -11,11 +11,5 @@
     "PERSISTENCE_PROVIDER": "turso",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAE4y25YkssM9TbSp"
   },
-  "d1_databases": [{
-    "binding": "DB",
-    "database_name": "intel-db",
-    "database_id": "9f678576-9b15-47b0-8178-e1d8362772cb",
-    "migrations_dir": "migrations"
-  }],
   "r2_buckets": [{ "binding": "EVIDENCE", "bucket_name": "intel-evidence" }]
 }
