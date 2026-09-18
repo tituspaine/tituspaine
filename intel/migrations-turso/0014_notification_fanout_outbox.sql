@@ -1,5 +1,8 @@
 PRAGMA foreign_keys=ON;
 
+CREATE INDEX idx_private_messages_sender_time
+ON private_messages(sender_user_id,created_at DESC,id DESC);
+
 CREATE TABLE notification_fanout_jobs(
   id TEXT PRIMARY KEY,
   investigation_id TEXT NOT NULL REFERENCES investigations(id),
