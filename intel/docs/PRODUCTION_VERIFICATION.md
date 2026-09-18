@@ -3,47 +3,37 @@
 Production: https://intel.tituspaine.com
 Branch: intel-v2-build
 
-## Current boundary
-Production database migrations 0001-0011 are applied. Migration application for 0011_claims_feeds_moderation was confirmed from the production admin migration response on 2026-09-18. Production schema validation succeeded on 2026-09-18. The validator confirmed migrations_0001_0011, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback and cleanup. Live route/interaction smoke checks remain a separate verification gate.
+## Verified production database boundary
+On 2026-09-18 production Turso confirmed migrations 0001-0013 and returned ok=true from the production validator. The successful checks included migrations_0001_0013, social_notification_schema, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback and cleanup.
+
+Migration 0014_notification_fanout_outbox is the only newer schema migration. It must not be described as production-applied until the administrator migration output confirms it.
 
 ## Verification states
 IMPLEMENTED: present on intel-v2-build.
-TESTED: final HEAD has a successful TypeScript/Vitest CI run.
-DEPLOYED: production Worker is confirmed to contain the final release header/revision.
+TESTED: exact final HEAD has successful TypeScript and complete Vitest CI.
+DEPLOYED: production Worker is confirmed to contain that final release revision.
 PRODUCTION VERIFIED: behavior is exercised successfully on intel.tituspaine.com.
 
-## Smoke matrix after 0011 validation
-Anonymous: Home Best/Active/Latest, Latest pagination, Search filters, Investigation Posts/Timeline/Evidence/Entities, flair links, opened Post, comment thread route, Evidence, Entity dossier, Relationship, Profile.
-Authenticated: Join/Leave, Follow, Save, Like, create Post, comment, reply, edit, attach evidence, create claim, Following, Notifications, Account recents/density, custom feeds.
-Moderator: remove/restore, source-request/context flags, queue and audit behavior.
-Admin: Operations, Publishing, Evidence/Intelligence, Moderation, System Health, Export, Database validation.
-Mobile: five-destination bottom nav, iPhone safe area, Back/Forward, refresh/deep links, post/comment progressive disclosure, menus, keyboard/composers, long content.
+## Required final production sequence
+1. Require green exact-HEAD CI.
+2. Deploy that exact intel-v2-build revision to the separate INTEL Worker only.
+3. Open /admin/database-migration as an INTEL administrator.
+4. Apply pending migration 0014_notification_fanout_outbox.
+5. Run production schema validation and require ok=true, migrations_0001_0014 and notification_fanout_outbox.
+6. Confirm System Health reports Push configured: yes and a healthy fanout backlog.
+7. From an iPhone, add INTEL to the Home Screen, launch the installed web app, and enable device notifications from Account.
+8. With a second adult test account, verify friend request/accept, profile privacy, conversation creation, text, image, PDF/text attachment, canonical INTEL share, unread/read synchronization, blocking/unblocking and a background push deep-link into the correct conversation.
+9. Exercise browser Back/Forward repeatedly across investigation tabs, posts, comments, Search, Messages, Account and deep links.
+10. Exercise anonymous/authenticated/moderator/admin smoke paths without creating junk permanent records.
+11. Record the exact deployed release SHA and only then mark the final revision PRODUCTION VERIFIED.
 
-## Non-destructive rule
-Do not create junk production records for testing. Destructive concurrency/load tests belong in local/test environments.
+## Safety and non-destructive rules
+Do not rerun already-applied migrations manually. Do not expose VAPID private keys, Turso tokens, session secrets or Turnstile secrets. Do not create junk production records for synthetic load tests. Destructive concurrency/load testing belongs in test environments.
 
-## Final repository verification
-Final repository verification must be performed on the exact final HEAD after documentation and validator cleanup. A successful earlier run is evidence for that earlier revision only; it is not silently promoted to a newer commit. Production deployment and production smoke verification remain independent gates.
-
-## Exact-head CI
-The final verification run must target the exact final intel-v2-build HEAD. Superseded or cancelled runs are not treated as success. TypeScript and the complete Vitest suite must both complete successfully before deployment status is advanced.
-
-## Production database validation evidence
-On 2026-09-18 production returned ok=true for validator runId `180fe722-0c6e-47d0-9ca7-9596f2ab76f6`. Checks passed: migrations_0001_0011, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback, cleanup.
-
-
-## Current social completion gate
-Production 0012 is verified. Migration 0013_social_notification_preferences is branch-complete but pending production application. The final Worker revision must be deployed after exact-HEAD CI succeeds. Browser push subscription registration and the service worker are implemented; actual background Web Push delivery remains an external configuration gate because production VAPID signing credentials have not been provisioned/verified.
-
-## Required production sequence
-1. Confirm exact final intel-v2-build HEAD CI succeeds.
-2. Deploy that exact branch revision to the separate INTEL Worker only.
-3. Open /admin/database-migration while authenticated as an INTEL administrator.
-4. Apply pending migrations; confirm 0013_social_notification_preferences:applied.
-5. Run Validate production schema; require ok=true and migrations_0001_0013 plus social_notification_schema.
-6. Configure the Web Push public/private VAPID signing credentials in the INTEL Worker environment without committing secrets.
-7. Redeploy if the environment requires it, enable device notifications from Account, and test a friend request, friend acceptance, direct message, attachment, private INTEL share and notification deep link on a real installed iPhone web app.
-8. Run the full anonymous/authenticated/moderator/admin/mobile smoke matrix and record the exact deployed release SHA.
-
-## 2026-09-18 social schema verification
-Production Turso migration output confirmed `0012_social_messaging_privacy:applied`. The administrator validation run returned `ok: true` with `migrations_0001_0012`, claims/feeds/moderation schema, hot-path indexes, investigation teams, atomic graph write, relationship FTS/provenance, claim write, transaction rollback, and cleanup checks passing. Application/UI smoke verification remains a separate deployment boundary.
+## Acceptance matrix
+Anonymous: Home sorting, Search filters, Investigation tabs, opened Post, comment permalink/thread, Evidence, Entity, Relationship and public profile behavior.
+Authenticated: registration/DOB, login/logout, Follow/Save/Like, contribution/reply/edit, evidence/claim links, Following, Notifications, Account activity/Saved pagination, privacy, contact-photo crop, custom feeds, friends/messages/shares/attachments.
+Moderator: remove/restore, moderation flags, queue and audit behavior.
+Admin: Operations, Publishing, Evidence/Intelligence, Moderation, System Health, Export and database validation.
+Mobile: five-destination bottom nav, iPhone safe areas, keyboard/composer stability, installed-PWA notification onboarding, Back/Forward, refresh/deep links, progressive disclosure and long-content handling.
+Failure: Turso/R2/push failures must not convert a committed core action into a false failure; duplicate message/share nonce must be idempotent; expired push endpoints must disable cleanly.
