@@ -24,3 +24,10 @@ describe('V3 hardening regressions',()=>{
  it('isolates update fanout failure from the published record',()=>{const admin=read('src/adminPublishingRoutes.ts');expect(admin).toContain('follower notification fanout failed');expect(read('src/notificationRepository.ts')).toContain('.slice(0,200)');});
  it('uses durable browser history rather than forced reload restoration',()=>{expect(read('public/intel.js')).not.toContain('location.reload');});
 });
+
+
+describe('secondary-work failure containment',()=>{
+ it('keeps moderation notifications outside core moderation batches',()=>{expect(read('src/moderationRepository.ts')).toContain('notifyAuthor');expect(read('src/communityRepository.ts')).toContain('notifyModeratedAuthor');expect(read('src/moderation.ts')).toContain('moderation author notification failed');});
+ it('keeps a persisted report valid if escalation automation fails',()=>{expect(read('src/reportRoutes.ts')).toContain('report escalation failed after report persisted');});
+ it('uses keyset cursors on growing private dashboard collections',()=>{const repo=read('src/dashboardRepository.ts'),routes=read('src/dashboardRoutes.ts');expect(repo).toContain('i.updated_at<?');expect(repo).toContain('n.created_at<?');expect(routes).toContain("searchParams.get('before')");});
+});
