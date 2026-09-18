@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeEmail, normalizeUsername, hashPassword, verifyPassword, securityHeaders, validSameOrigin } from '../src/security';
+import { checkRateLimit } from '../src/rateLimit';
 
 describe('identity normalization',()=>{
   it('normalizes email deterministically',()=>expect(normalizeEmail('  Titus@Example.COM ')).toBe('titus@example.com'));
@@ -21,4 +22,10 @@ describe('request security',()=>{
 describe('hard product rules',()=>{
   it('documents immutable-comment architecture at API level',()=>expect(['PATCH /api/comments/:id','PUT /api/comments/:id','DELETE /api/comments/:id']).toHaveLength(3));
   it('keeps report threshold exact',()=>expect(10).toBe(10));
+});
+
+
+describe('endpoint rate budgets',()=>{
+ it('returns structured 429 responses with Retry-After',async()=>{const req=new Request('https://intel.tituspaine.com/api/x',{headers:{'CF-Connecting-IP':'203.0.113.77'}});let response:Response|null=null;for(let i=0;i<13;i++)response=checkRateLimit(req,'auth',1000);expect(response?.status).toBe(429);expect(response?.headers.get('Retry-After')).toBeTruthy();expect(await response!.json()).toMatchObject({ok:false,error:{code:'RATE_LIMITED'}});});
+ it('uses a larger engagement budget than content publishing',()=>{const a=new Request('https://intel.tituspaine.com/api/a',{headers:{'CF-Connecting-IP':'203.0.113.78'}}),b=new Request('https://intel.tituspaine.com/api/b',{headers:{'CF-Connecting-IP':'203.0.113.79'}});let content:Response|null=null,engagement:Response|null=null;for(let i=0;i<25;i++){content=checkRateLimit(a,'content',2000);engagement=checkRateLimit(b,'engagement',2000);}expect(content?.status).toBe(429);expect(engagement).toBeNull();});
 });
