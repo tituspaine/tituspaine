@@ -64,5 +64,7 @@ describe('mobile community object refinement contracts',()=>{
  it('keeps comment and reply composers collapsed until requested',()=>{const p=read('src/postViews.ts'),js=read('public/intel.js');expect(p).toContain('post-comment-composer');expect(p).toContain('inline-reply-form thread-composer');expect(js).toContain("closest('.composer-toggle')");});
  it('demotes intelligence tools into contribution composers',()=>{const p=read('src/postViews.ts');expect(p).toContain('composer-intelligence');expect(p).not.toContain('intelligence-add');});
  it('preserves bounded visual thread lineage and reduced motion',()=>{const v=read('src/views.ts'),p=read('src/postViews.ts');expect(v).toContain('.comment-children{position:relative');expect(p).toContain('Math.min(4,Number(x.depth)');expect(v).toContain('prefers-reduced-motion:reduce');});
+ it('overrides the legacy square mobile feed rule with rounded cards',()=>{const v=read('src/views.ts');expect(v).toContain('.investigation-feed .feed-item{padding:14px;margin:0;border-radius:20px!important}');expect(v).toContain('.investigation-feed{padding:10px 12px');});
+ it('shows only one primary comment action state at a time',()=>{const js=read('public/intel.js'),v=read('src/views.ts');expect(js).toContain('composerToggle.hidden=!form.hidden');expect(js).toContain('composer-toggle[data-composer-target=');expect(v).toContain('.comment-composer textarea{display:block;width:100%;border:1px solid');});
  it('does not introduce dark mode',()=>{expect(read('src/views.ts')).not.toContain('prefers-color-scheme:dark');});
 });
