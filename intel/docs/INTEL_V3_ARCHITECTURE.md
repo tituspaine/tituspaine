@@ -1,7 +1,7 @@
 # INTEL V3 production architecture
 
 ## Product model
-INTEL is a feed-first community intelligence network. The human browsing hierarchy is Home/Latest/Following -> Investigation -> Post -> Comment -> Reply. The intelligence hierarchy remains Investigation -> evidence/sources -> claims -> entities -> relationships -> corrections/provenance/timeline.
+INTEL is a feed-first community intelligence network. The human browsing hierarchy is Home/Following/Notifications/Messages/Account -> Investigation -> Post -> Comment -> Reply. The intelligence hierarchy remains Investigation -> evidence/sources -> claims -> entities -> relationships -> corrections/provenance/timeline.
 
 Popularity is never verification. Engagement counters rank community usefulness; verification state, source quality, claim state and provenance remain separate deterministic records.
 
@@ -24,13 +24,16 @@ Removal/restoration, thread lock/pin and contextual moderation state are separat
 Mutations enforce same-origin checks and server-side authorization. Auth/account/admin/moderation are private/no-store. Anonymous public pages may use short shared caching only when personalized state is absent. Rate limiting is endpoint-classed isolate-local defense-in-depth.
 
 ## Navigation and mobile
-URLs are authoritative. Mobile primary navigation is Home, Latest, Search, Following, Account for authenticated users. JavaScript adds optimistic interactions, recents, menu discipline and shortcuts but does not own routing. iPhone safe areas and 16px form controls are first-class.
+URLs are authoritative. Mobile primary navigation is Home, Following, Notifications, Messages, Account for authenticated users. Search remains a prominent Home/header capability rather than consuming a primary mobile tab. JavaScript adds optimistic interactions, recents, menu discipline and shortcuts but does not own routing. iPhone safe areas and 16px form controls are first-class.
 
 ## Schema
-Production is currently applied through 0010. Migration 0011_claims_feeds_moderation is repository-implemented and must be applied before code paths that use claims/custom feeds/contextual moderation are considered production-ready.
+Production is confirmed applied and validated through migration 0014_notification_fanout_outbox as of 2026-09-18.
 
 ## Visual identity and information color
 INTEL uses an approximately 85/15 neutral-to-signal visual balance. Cobalt is the product/interaction identity. Emerald denotes supported/verified states, amber disputed/source-request states, crimson corrections/serious moderation states, navy public-record/evidence context, violet analysis/entity context, and orange-red genuinely fresh/breaking activity. These colors are semantic UI signals, never truth scores. Investigation accents are deterministic presentation identity only and do not encode verification or importance. Evidence, claims, entities and community posts intentionally have distinct visual grammar so mixed feeds remain scannable without becoming a dashboard of nested cards. Dark mode is intentionally not part of this pass.
 
 ## Community object and thread presentation
 Major community objects use a shared tactile surface hierarchy: investigation feed cards and investigation identity heroes are rounded elevated objects; posts are compact rounded community cards; opened posts are stronger primary content surfaces; comments and replies are rounded thread cards connected by thin parent/child lineage rules. Visual indentation is bounded while lineage continues, preventing deep mobile threads from collapsing the reading column. Post/comment actions follow Like → Comment/Reply → Share → Save → More. Like is a thumbs-up usefulness signal and remains architecturally independent from evidence and verification. Comment/reply composers are collapsed by default and opened contextually; intelligence attachment controls live inside the active composer as progressive disclosure rather than competing with primary discussion actions. The server-rendered thread remains authoritative and JavaScript only enhances composer toggling and mutations. Decorative live/buzzing signal banners are intentionally excluded.
+
+## Social and notification operations
+Friend discovery is explicitly user-opened and uses bounded deterministic similarity matching. Direct messaging requires mutual friendship. Social notification preferences govern in-app and push delivery independently. Follower-update notifications use only the durable leased notification_fanout_jobs outbox; the publishing transaction never depends on materialized follower notifications.
