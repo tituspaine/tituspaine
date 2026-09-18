@@ -40,3 +40,10 @@ describe('reddit-level intelligence UX contracts',()=>{
  it('ships pull-based custom feeds',()=>{expect(read('src/customFeedRepository.ts')).toContain('custom_feed_investigations');expect(read('src/entry.ts')).toContain("p==='/feeds'");});
  it('exposes contextual moderation state with audit history',()=>{expect(read('src/communityRepository.ts')).toContain('COMMENT_MODERATION_FLAG');expect(read('src/communityRoutes.ts')).toContain('setCommentModerationFlagV3');});
 });
+
+
+describe('product architecture boundaries',()=>{
+ it('keeps browser URLs authoritative and five-destination mobile navigation',()=>{const v=read('src/views.ts');for(const label of ['Home','Latest','Search','Following','Account'])expect(v).toContain(label);expect(read('public/intel.js')).not.toContain('location.reload');});
+ it('keeps claim state independent from comment likes',()=>{const m=read('migrations-turso/0011_claims_feeds_moderation.sql');expect(m).toContain("CHECK(status IN('UNVERIFIED','SUPPORTED','DISPUTED','CORRECTED'))");expect(m).not.toContain('like_count');});
+ it('keeps passive recents browser-local',()=>{const js=read('public/intel.js');expect(js).toContain('localStorage.setItem(RECENT_KEY');expect(js).not.toContain('/api/recent');});
+});
