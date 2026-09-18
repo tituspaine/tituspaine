@@ -27,7 +27,7 @@ Mutations enforce same-origin checks and server-side authorization. Auth/account
 URLs are authoritative. Mobile primary navigation is Home, Following, Notifications, Messages, Account for authenticated users. Search remains a prominent Home/header capability rather than consuming a primary mobile tab. JavaScript adds optimistic interactions, recents, menu discipline and shortcuts but does not own routing. iPhone safe areas and 16px form controls are first-class.
 
 ## Schema
-Production is confirmed applied and validated through migration 0014_notification_fanout_outbox as of 2026-09-18.
+Production is confirmed applied and validated through migration 0014_notification_fanout_outbox as of 2026-09-18. Migration 0015_fanout_retry_health is the next forward-only production migration.
 
 ## Visual identity and information color
 INTEL uses an approximately 85/15 neutral-to-signal visual balance. Cobalt is the product/interaction identity. Emerald denotes supported/verified states, amber disputed/source-request states, crimson corrections/serious moderation states, navy public-record/evidence context, violet analysis/entity context, and orange-red genuinely fresh/breaking activity. These colors are semantic UI signals, never truth scores. Investigation accents are deterministic presentation identity only and do not encode verification or importance. Evidence, claims, entities and community posts intentionally have distinct visual grammar so mixed feeds remain scannable without becoming a dashboard of nested cards. Dark mode is intentionally not part of this pass.
