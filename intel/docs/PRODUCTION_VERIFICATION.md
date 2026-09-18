@@ -24,3 +24,6 @@ Do not create junk production records for testing. Destructive concurrency/load 
 
 ## Final repository verification
 Final repository verification must be performed on the exact final HEAD after documentation and validator cleanup. A successful earlier run is evidence for that earlier revision only; it is not silently promoted to a newer commit. Production deployment and production smoke verification remain independent gates.
+
+## Exact-head CI
+The final verification run must target the exact final intel-v2-build HEAD. Superseded or cancelled runs are not treated as success. TypeScript and the complete Vitest suite must both complete successfully before deployment status is advanced.
