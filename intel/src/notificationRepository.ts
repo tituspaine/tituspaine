@@ -11,19 +11,8 @@ export class NotificationRepository {
     );
   }
 
-  async notifyFollowers(investigationId:string,updateId:string,exclude?:string) {
-    // Best-effort notification materialization is intentionally bounded. Following remains
-    // pull-based and authoritative for large audiences, so notification fan-out never gates
-    // the publishing transaction or becomes the only way followers can discover an update.
-    const rows=await this.db.execute<{user_id:string}>('SELECT user_id FROM investigation_follows WHERE investigation_id=? ORDER BY user_id LIMIT 201',[investigationId]);
-    const recipients=rows.rows.filter(x=>x.user_id!==exclude).slice(0,200);
-    if(!recipients.length)return {delivered:0,truncated:false};
-    const now=Date.now(),chunk=50;
-    for(let i=0;i<recipients.length;i+=chunk){
-      await this.db.batch(recipients.slice(i,i+chunk).map(x=>({sql:'INSERT INTO notifications(id,user_id,type,investigation_id,update_id,created_at) VALUES(?,?,?,?,?,?)',args:[randomId(),x.user_id,'FOLLOWED_INVESTIGATION_UPDATE',investigationId,updateId,now]})));
-    }
-    return {delivered:recipients.length,truncated:rows.rows.length>200};
-  }
+  // Follower update fanout is exclusively handled by FanoutRepository's durable
+  // leased outbox. Keep this repository limited to direct notification records.
 
   markAllRead(userId:string,now:number){return this.db.execute('UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL',[now,userId]);}
 
