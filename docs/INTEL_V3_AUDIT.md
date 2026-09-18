@@ -140,3 +140,15 @@ Migrations must remain separate from normal Worker deployment. A schema migratio
 ## External dependency gate
 
 No user action is required for Phase 0/early Phase 1. Before real remote Turso integration tests, the owner must create/authorize a Turso database and configure its URL/token as Cloudflare Worker secrets. Secrets must not be pasted into chat or committed to GitHub.
+
+## 2026-09-18 community intelligence refinement audit
+
+- Production migration 0011_claims_feeds_moderation is applied; full production schema validation and live smoke verification remain separate gates.
+- Community hierarchy is Investigation -> Post -> Comment -> Reply. Opened posts use bounded top-level reads and bounded immediate-child previews; whole descendant trees are not initial-page reads.
+- Home exposes deterministic Best/Active/Latest modes. Following and notifications use keyset pagination. Custom feeds are pull-based to avoid write fan-out.
+- Engagement and verification are architecturally independent. Claim status is explicit and evidence-oriented; comment likes cannot alter claim status or evidence verification.
+- Contribution evidence references, structured claims, contextual moderation flags, entity dossiers, local Recently Viewed, local recent searches and density preferences are implemented on the development branch.
+- Mobile primary navigation is Home, Latest, Search, Following, Account for authenticated users. Server-rendered URLs remain authoritative; JavaScript is progressive enhancement.
+- Notification materialization for investigation updates is deliberately bounded; Following is the pull-based authoritative discovery path for audiences larger than the synchronous notification budget.
+- Rate limiting is endpoint-specific but isolate-local and therefore defense-in-depth, not a global quota.
+- Remaining production gates: validate 0011 schema, confirm final Worker deployment revision, then complete anonymous/authenticated/moderator/admin/mobile smoke matrix.
