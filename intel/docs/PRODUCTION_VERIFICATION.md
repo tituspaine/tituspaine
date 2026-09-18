@@ -1,30 +1,31 @@
-# INTEL production verification — 2026-09-17
+# INTEL production verification
 
-Production: `https://intel.tituspaine.com`
-Worker: `tituspaine-intel`
-Branch: `intel-v2-build`
+Production: https://intel.tituspaine.com
+Worker: tituspaine-intel
+Development branch: intel-v2-build
 
-## Live smoke results
-A forced live fetch after the final product deployment verified:
+## Verified database state
+Production migrations 0001 through 0009 have been applied through the authenticated Admin database maintenance flow. Migration 0009_post_thread_scaling is the current schema generation and adds the post/thread scaling indexes.
 
-- `/` — HTTP 200; current public INTEL feed rendered with compact search/navigation and no runtime error.
-- `/search?q=Albany` — HTTP 200; deterministic search rendered and returned a clean empty state against the currently empty public dataset.
-- `/login` — HTTP 200; login form rendered.
-- `/register` — HTTP 200; registration form and Cloudflare Turnstile rendered.
-- `/following` while logged out — redirected to `/login?return=%2Ffollowing` and rendered successfully.
-- `/notifications` while logged out — redirected to `/login?return=%2Fnotifications` and rendered successfully.
-- `/robots.txt` — HTTP 200; private/admin/API/system paths disallowed and sitemap advertised.
-- `/sitemap.xml` — HTTP 200; valid XML generated from current public dataset.
-- `/manifest.webmanifest` — HTTP 200; standalone INTEL manifest served.
-- `/system/turso-production` — HTTP 404 after migration-console retirement, confirming the one-time browser migration surface is no longer publicly routed.
+## Repository hardening after 0009
+The branch contains the dedicated Investigation -> Post -> Comment -> Reply routing model, bounded collection reads, post-context deep links, endpoint-class rate limits, bounded/chunked follower fan-out, notification failure containment, mobile safe-area/menu fixes, admin operations consolidation, live DB System Health probing and request correlation identifiers.
 
-The current production database has no public investigations, so a real investigation/evidence/entity/relationship deep link could not be exercised without creating junk production records. Those routes are covered by repository routing/contracts and CI rather than polluting production for smoke testing.
+## Verification boundary
+IMPLEMENTED means present on intel-v2-build.
+TESTED means TypeScript/Vitest or another explicit test run was observed passing.
+DEPLOYED means the production Worker is confirmed to contain the relevant branch revision.
+PRODUCTION VERIFIED means the behavior was exercised successfully against intel.tituspaine.com.
 
-## Database validation
-Production Turso migrations `0001`–`0005` were previously applied and validated. Successful production validation Run ID: `297c409e-07ae-4ddd-9cf2-416cbdd18e4f`. Validation covered migration state, investigation team schema, atomic graph write, relationship FTS, provenance, atomic rollback and cleanup.
+Do not collapse these states into one claim. The GitHub connector available during this hardening pass does not expose push-triggered INTEL CI runs through its commit-workflow endpoint, and combined commit status may be empty. Therefore repository changes are not described as CI-passed solely because they were pushed.
 
-## CI
-Final branch changes are required to pass `npm run typecheck` and `npm test` through INTEL CI. The completion contract additionally prevents D1 runtime/provider regressions and asserts the dedicated community surfaces, investigation authorization rules, evidence invariants, mobile destinations and search filter/deep-link behavior.
+## Required final production smoke matrix
+After the hardened revision is deployed, verify:
+- anonymous Home, Latest, Search, Investigation, opened Post, comment permalink, Evidence, Entity, Relationship and Profile;
+- authenticated Join/Leave, Follow user, Save, Like, create Post, comment, reply, edit, report, Following, Notifications and Account;
+- moderator remove/restore and queue reconciliation;
+- admin Operations, Publishing, Evidence/Intelligence, Moderation, System Health, Export and Database validation;
+- iPhone Safari Back/Forward, refresh, direct deep links, anchors, fixed bottom navigation, menus, keyboard/composers and safe-area behavior;
+- failure behavior for missing records and optional notification failures.
 
-## Non-destructive verification rule
-Registration, investigation creation, comments, reports, evidence uploads and moderation were not used as production smoke probes because doing so would create artificial public/user records. Their implementation is exercised by static/behavioral contracts, schema invariants and CI; real use should create only genuine platform data.
+## Non-destructive rule
+Do not create junk production investigations/evidence/reports solely for smoke testing. Use genuine records or a non-production validation environment for destructive/concurrency/load tests.
