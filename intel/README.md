@@ -10,7 +10,7 @@
 - Relational state: Turso/libSQL production database
 - Binary evidence: Cloudflare R2 bucket `intel-evidence`, binding `EVIDENCE`
 - Human verification: Cloudflare Turnstile
-- UI: server-rendered semantic HTML/CSS; JavaScript is intentionally minimal and currently used for password visibility controls and Turnstile.
+- UI: server-rendered semantic HTML/CSS with progressive JavaScript enhancement for optimistic interactions, inline replies, bounded local recents/search history, density preference, menu behavior, sharing and keyboard shortcuts.
 - No production LLM dependency.
 - No D1 runtime dependency, fallback, binding, adapter, provider switch, or D1 deployment script.
 
@@ -34,9 +34,9 @@ CI performs typecheck and tests on branch changes. Deployment is intentionally s
 
 ## Turso migrations
 
-Production schema is applied through `0005_investigation_teams.sql`. Production validation verified migration tracking, investigation team schema, atomic graph writes, relationship FTS, provenance, transaction rollback, and cleanup.
+Production schema is applied through `0011_claims_feeds_moderation.sql`. Migrations remain forward-only and tracked in `schema_migrations`. The controlled production validator verifies the full migration chain, hot-path indexes, investigation team schema, graph writes, relationship FTS/provenance, structured claim writes, transaction rollback, and cleanup.
 
-`src/tursoProduction.ts` retains the explicit pinned migration/validation implementation for future controlled maintenance. It is deliberately not exposed as a public application route. Future migrations must be reviewed, pinned to an immutable repository commit, applied explicitly, validated, and only then followed by application code that requires the new schema.
+`src/tursoProduction.ts` retains the explicit pinned migration/validation implementation for future controlled maintenance. It is exposed only through administrator-only, same-origin, secret-guarded database maintenance routes; it is never a public migration API. Future migrations must be reviewed, pinned to an immutable repository commit, applied explicitly, validated, and only then followed by application code that requires the new schema.
 
 ## Product surfaces
 
