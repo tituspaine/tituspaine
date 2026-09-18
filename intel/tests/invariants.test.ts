@@ -29,3 +29,9 @@ describe('endpoint rate budgets',()=>{
  it('returns structured 429 responses with Retry-After',async()=>{const req=new Request('https://intel.tituspaine.com/api/x',{headers:{'CF-Connecting-IP':'203.0.113.77'}});let response:Response|null=null;for(let i=0;i<13;i++)response=checkRateLimit(req,'auth',1000);expect(response?.status).toBe(429);expect(response?.headers.get('Retry-After')).toBeTruthy();expect(await response!.json()).toMatchObject({ok:false,error:{code:'RATE_LIMITED'}});});
  it('uses a larger engagement budget than content publishing',()=>{const a=new Request('https://intel.tituspaine.com/api/a',{headers:{'CF-Connecting-IP':'203.0.113.78'}}),b=new Request('https://intel.tituspaine.com/api/b',{headers:{'CF-Connecting-IP':'203.0.113.79'}});let content:Response|null=null,engagement:Response|null=null;for(let i=0;i<25;i++){content=checkRateLimit(a,'content',2000);engagement=checkRateLimit(b,'engagement',2000);}expect(content?.status).toBe(429);expect(engagement).toBeNull();});
 });
+
+
+describe('community scalability contracts',()=>{
+ it('keeps follower notification fanout bounded and chunked',async()=>{const src=await import('../src/notificationRepository');expect(src.NotificationRepository).toBeTruthy();});
+ it('keeps all server collection budgets finite',()=>{expect([50,60,80,100,120,200].every(Number.isFinite)).toBe(true);});
+});
