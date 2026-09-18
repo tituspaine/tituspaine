@@ -20,7 +20,7 @@ export class FanoutRepository{
    if(recipients.length)try{await this.db.batch(recipients.map((x:any)=>({sql:"INSERT OR IGNORE INTO notifications(id,user_id,type,investigation_id,update_id,created_at) VALUES(?,?,?,?,?,?)",args:[job.id+'-'+x.user_id,x.user_id,'FOLLOWED_INVESTIGATION_UPDATE',job.investigation_id,job.update_id,Date.now()]})));}catch(error){const message=(error instanceof Error?error.message:String(error)).slice(0,500);await this.db.execute("UPDATE notification_fanout_jobs SET status='PENDING',lease_owner=NULL,lease_expires_at=NULL,last_error=?,updated_at=? WHERE id=? AND lease_owner=?",[message,Date.now(),job.id,owner]);continue;}
    delivered+=recipients.length;
    const cursor=rows.rows.at(-1).user_id,done=rows.rows.length<take;
-   await this.db.execute("UPDATE notification_fanout_jobs SET cursor_user_id=?,status=?,lease_owner=NULL,lease_expires_at=NULL,updated_at=? WHERE id=? AND lease_owner=?",[cursor,done?'DONE':'RUNNING',Date.now(),job.id,owner]);
+   await this.db.execute("UPDATE notification_fanout_jobs SET cursor_user_id=?,status=?,lease_owner=NULL,lease_expires_at=NULL,updated_at=? WHERE id=? AND lease_owner=?",[cursor,done?'DONE':'PENDING',Date.now(),job.id,owner]);
    if(done)completed++;
   }
   return{delivered,completed};
