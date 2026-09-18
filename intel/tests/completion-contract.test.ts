@@ -21,7 +21,7 @@ describe('final community network contracts',()=>{it('keeps author edits auditab
 describe('V3 hardening regressions',()=>{
  it('keeps edit navigation rooted in the owning post',()=>{expect(read('src/communityRepository.ts')).toContain('parent_id,root_id,author_user_id');expect(read('src/communityRoutes.ts')).toContain('comment.root_id||comment.id');});
  it('does not use request-unique CF-Ray as the abuse limiter identity',()=>{const rate=read('src/rateLimit.ts');expect(rate).toContain("CF-Connecting-IP");expect(rate).not.toContain("get('CF-Ray')");});
- it('isolates update fanout failure from the published record',()=>{const admin=read('src/adminPublishingRoutes.ts');expect(admin).toContain('follower notification fanout failed');expect(read('src/notificationRepository.ts')).toContain('.slice(0,200)');});
+ it('isolates and resumes update fanout outside the published record',()=>{const admin=read('src/adminPublishingRoutes.ts'),fanout=read('src/fanoutRepository.ts');expect(admin).toContain('follower fanout outbox unavailable');expect(admin).toContain('executionCtx.waitUntil');expect(fanout).toContain('notification_fanout_jobs');expect(fanout).toContain('INSERT OR IGNORE INTO notifications');expect(fanout).toContain('lease_token');});
  it('uses durable browser history rather than forced reload restoration',()=>{expect(read('public/intel.js')).not.toContain('location.reload');});
 });
 
