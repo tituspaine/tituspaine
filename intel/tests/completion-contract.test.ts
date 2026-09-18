@@ -55,3 +55,14 @@ describe('INTEL visual identity contracts',()=>{
  it('visually distinguishes evidence claims and flair',()=>{const v=read('src/views.ts');expect(v).toContain('.evidence-card');expect(v).toContain('data-flair*="BREAKING"');expect(read('src/postViews.ts')).toContain('source-link');});
  it('does not introduce dark mode',()=>{expect(read('src/views.ts')).not.toContain('prefers-color-scheme:dark');});
 });
+
+
+describe('mobile community object refinement contracts',()=>{
+ it('removes decorative signal banners',()=>{const v=read('src/investigationViews.ts');expect(v).not.toContain('INTEL signal');expect(v).not.toContain('Fresh intelligence');expect(read('src/views.ts')).not.toContain('.live-signal');});
+ it('uses rounded object surfaces for investigations posts and threads',()=>{const v=read('src/views.ts');expect(v).toContain('.investigation-feed-card{border:1px');expect(v).toContain('.investigation-page>.investigation-head{margin:14px');expect(v).toContain('.opened-post{border:1px');expect(v).toContain('.thread-card{position:relative');});
+ it('uses a thumbs-up interaction instead of the old triangle',()=>{const p=read('src/postViews.ts');expect(p).toContain("const thumbIcon='<svg");expect(p).not.toContain('<span class="+'"'+'thumb"+'"'+'>△</span>');expect(p).toContain('like-button');});
+ it('keeps comment and reply composers collapsed until requested',()=>{const p=read('src/postViews.ts'),js=read('public/intel.js');expect(p).toContain('id="+'"'+'post-comment-composer"+'"'+');expect(p).toContain('inline-reply-form thread-composer');expect(js).toContain("closest('.composer-toggle')");});
+ it('demotes intelligence tools into contribution composers',()=>{const p=read('src/postViews.ts');expect(p).toContain('composer-intelligence');expect(p).not.toContain('class="+'"'+'intelligence-add"+'"'+');});
+ it('preserves bounded visual thread lineage and reduced motion',()=>{const v=read('src/views.ts'),p=read('src/postViews.ts');expect(v).toContain('.comment-children{position:relative');expect(p).toContain('Math.min(4,Number(x.depth)');expect(v).toContain('prefers-reduced-motion:reduce');});
+ it('does not introduce dark mode',()=>{expect(read('src/views.ts')).not.toContain('prefers-color-scheme:dark');});
+});
