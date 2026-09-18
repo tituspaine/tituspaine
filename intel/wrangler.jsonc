@@ -4,6 +4,7 @@
   "main": "src/entry.ts",
   "compatibility_date": "2026-09-16",
   "workers_dev": true,
+  "triggers": { "crons": ["* * * * *"] },
   "assets": { "directory": "public", "run_worker_first": false },
   "vars": {
     "APP_ORIGIN": "https://intel.tituspaine.com",
