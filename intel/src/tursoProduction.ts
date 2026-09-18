@@ -6,7 +6,7 @@ import { layout } from './views';
 
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body,null,2),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'}});
 const assert=(condition:unknown,message:string)=>{if(!condition)throw new Error(message);};
-const PINNED_MIGRATION_COMMIT='07b7d95b711125069adbf199a6e98d0a5f4c7b06';
+const PINNED_MIGRATION_COMMIT='f5938dd87093aeb706a60dbe779fad9be282c292';
 const MIGRATIONS=['0001_core.sql','0002_search.sql','0003_graph_provenance.sql','0004_entity_kinds_search.sql','0005_investigation_teams.sql','0006_comment_posts_tags.sql','0007_community_network.sql','0008_unified_search.sql','0009_post_thread_scaling.sql','0010_hot_path_indexes.sql','0011_claims_feeds_moderation.sql','0012_social_messaging_privacy.sql','0013_social_notification_preferences.sql','0014_notification_fanout_outbox.sql','0015_fanout_retry_health.sql'];
 const EXPECTED_URL='libsql://intel-production-tituspaine.aws-us-east-1.turso.io';
 const migrationUrl=(file:string)=>`https://raw.githubusercontent.com/tituspaine/tituspaine/${PINNED_MIGRATION_COMMIT}/intel/migrations-turso/${file}`;
