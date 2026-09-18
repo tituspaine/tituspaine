@@ -11,7 +11,7 @@ document.addEventListener('submit',async e=>{
  }
  if(form.matches('form[data-async-follow],form[data-async-save]')){
   e.preventDefault();const btn=form.querySelector('button');if(!btn||btn.dataset.busy)return;btn.dataset.busy='1';btn.disabled=true;
-  try{const res=await mutate(form),data=await res.json().catch(()=>null);if(!res.ok||!data?.ok)throw new Error(data?.error?.message||'Request failed');if(form.matches('[data-async-follow]')){const on=!!data.state?.following;btn.textContent=on?'Following':'Follow';btn.classList.toggle('active',on);}else{const on=!!data.state?.saved;btn.textContent=on?'Saved':'Save';btn.classList.toggle('active',on);}}
+  try{const res=await mutate(form),data=await res.json().catch(()=>null);if(!res.ok||!data?.ok)throw new Error(data?.error?.message||'Request failed');if(form.matches('[data-async-follow]')){const on=!!data.state?.following;btn.textContent=on?'Joined':'Join';btn.classList.toggle('active',on);}else{const on=!!data.state?.saved;btn.textContent=on?'Saved':'Save';btn.classList.toggle('active',on);}}
   catch(err){console.error(err);announce(form,'Could not save that change.');}finally{delete btn.dataset.busy;btn.disabled=false;}return;
  }
  if(form.matches('.inline-reply-form')){
