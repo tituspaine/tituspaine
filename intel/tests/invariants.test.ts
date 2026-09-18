@@ -32,6 +32,6 @@ describe('endpoint rate budgets',()=>{
 
 
 describe('community scalability contracts',()=>{
- it('uses the durable leased outbox as the only follower fanout path',async()=>{const {NotificationRepository}=await import('../src/notificationRepository');expect('notifyFollowers' in NotificationRepository.prototype).toBe(false);const source=await import('node:fs').then(fs=>fs.readFileSync(new URL('../src/fanoutRepository.ts',import.meta.url),'utf8'));expect(source).toContain('notification_outbox');expect(source).toContain('lease_until');expect(source).toContain('attempts');expect(source).toContain('LIMIT ?');});
+ it('uses the durable leased outbox as the only follower fanout path',async()=>{const {NotificationRepository}=await import('../src/notificationRepository');expect('notifyFollowers' in NotificationRepository.prototype).toBe(false);const source=await import('node:fs').then(fs=>fs.readFileSync(new URL('../src/fanoutRepository.ts',import.meta.url),'utf8'));expect(source).toContain('notification_fanout_jobs');expect(source).toContain('lease_expires_at');expect(source).toContain("status='RUNNING'");expect(source).toContain('LIMIT ?');});
  it('keeps all server collection budgets finite',()=>{expect([50,60,80,100,120,200].every(Number.isFinite)).toBe(true);});
 });
