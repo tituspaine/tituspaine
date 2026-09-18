@@ -1,31 +1,23 @@
 # INTEL production verification
 
 Production: https://intel.tituspaine.com
-Worker: tituspaine-intel
-Development branch: intel-v2-build
+Branch: intel-v2-build
 
-## Verified database state
-Production migrations 0001 through 0009 have been applied through the authenticated Admin database maintenance flow. Migration 0009_post_thread_scaling is the current schema generation and adds the post/thread scaling indexes.
+## Current boundary
+Production database migrations 0001-0010 are verified applied. Repository migration 0011_claims_feeds_moderation is pending production application. Do not describe claims, custom feeds or contextual moderation state as production-verified until 0011 is applied and schema validation succeeds.
 
-## Repository hardening after 0009
-The branch contains the dedicated Investigation -> Post -> Comment -> Reply routing model, bounded collection reads, post-context deep links, endpoint-class rate limits, bounded/chunked follower fan-out, notification failure containment, mobile safe-area/menu fixes, admin operations consolidation, live DB System Health probing and request correlation identifiers.
+## Verification states
+IMPLEMENTED: present on intel-v2-build.
+TESTED: final HEAD has a successful TypeScript/Vitest CI run.
+DEPLOYED: production Worker is confirmed to contain the final release header/revision.
+PRODUCTION VERIFIED: behavior is exercised successfully on intel.tituspaine.com.
 
-## Verification boundary
-IMPLEMENTED means present on intel-v2-build.
-TESTED means TypeScript/Vitest or another explicit test run was observed passing.
-DEPLOYED means the production Worker is confirmed to contain the relevant branch revision.
-PRODUCTION VERIFIED means the behavior was exercised successfully against intel.tituspaine.com.
-
-Do not collapse these states into one claim. The GitHub connector available during this hardening pass does not expose push-triggered INTEL CI runs through its commit-workflow endpoint, and combined commit status may be empty. Therefore repository changes are not described as CI-passed solely because they were pushed.
-
-## Required final production smoke matrix
-After the hardened revision is deployed, verify:
-- anonymous Home, Latest, Search, Investigation, opened Post, comment permalink, Evidence, Entity, Relationship and Profile;
-- authenticated Join/Leave, Follow user, Save, Like, create Post, comment, reply, edit, report, Following, Notifications and Account;
-- moderator remove/restore and queue reconciliation;
-- admin Operations, Publishing, Evidence/Intelligence, Moderation, System Health, Export and Database validation;
-- iPhone Safari Back/Forward, refresh, direct deep links, anchors, fixed bottom navigation, menus, keyboard/composers and safe-area behavior;
-- failure behavior for missing records and optional notification failures.
+## Smoke matrix after 0011
+Anonymous: Home Best/Active/Latest, Latest pagination, Search filters, Investigation Posts/Timeline/Evidence/Entities, flair links, opened Post, comment thread route, Evidence, Entity dossier, Relationship, Profile.
+Authenticated: Join/Leave, Follow, Save, Like, create Post, comment, reply, edit, attach evidence, create claim, Following, Notifications, Account recents/density, custom feeds.
+Moderator: remove/restore, source-request/context flags, queue and audit behavior.
+Admin: Operations, Publishing, Evidence/Intelligence, Moderation, System Health, Export, Database validation.
+Mobile: five-destination bottom nav, iPhone safe area, Back/Forward, refresh/deep links, post/comment progressive disclosure, menus, keyboard/composers, long content.
 
 ## Non-destructive rule
-Do not create junk production investigations/evidence/reports solely for smoke testing. Use genuine records or a non-production validation environment for destructive/concurrency/load tests.
+Do not create junk production records for testing. Destructive concurrency/load tests belong in local/test environments.
