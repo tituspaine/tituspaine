@@ -10,5 +10,6 @@
     "ENVIRONMENT": "production",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAE4y25YkssM9TbSp"
   },
-  "r2_buckets": [{ "binding": "EVIDENCE", "bucket_name": "intel-evidence" }]
+  "r2_buckets": [{ "binding": "EVIDENCE", "bucket_name": "intel-evidence" }],
+  "secrets": { "required": ["TURNSTILE_SECRET_KEY", "SESSION_PEPPER", "TURSO_VALIDATION_BOOTSTRAP_TOKEN", "TURSO_PRODUCTION_DATABASE_URL", "TURSO_PRODUCTION_AUTH_TOKEN"] }
 }
