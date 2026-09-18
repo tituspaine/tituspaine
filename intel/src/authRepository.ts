@@ -15,10 +15,10 @@ export class AuthRepository{
   await this.createSession(v.id,v.sessionId,v.tokenHash,v.now);
   try{await this.audit(v.id,'ACCOUNT_CREATED',v.now);}catch(e){console.error('account audit write failed',e);}
  }
- async repairPartialAccount(v:{id:string;hash:string;salt:string;params:string;sessionId:string;tokenHash:string;now:number}){
+ async repairPartialAccount(v:{id:string;hash:string;salt:string;params:string;sessionId:string;tokenHash:string;now:number;dob:string;notificationConsent:number;cookieConsent:number}){
   /* A previous interrupted registration can leave users without credentials.
      Repair the credential first so login becomes valid even if session/audit fails. */
-  await this.db.execute('INSERT INTO user_credentials(user_id,password_hash,password_salt,kdf,kdf_params,updated_at) VALUES(?,?,?,?,?,?)',[v.id,v.hash,v.salt,'PBKDF2-SHA256',v.params,v.now]);
+  await this.db.batch([{sql:'UPDATE users SET date_of_birth=?,age_verified_at=?,notification_consent=?,cookie_consent=?,terms_accepted_at=? WHERE id=? AND date_of_birth IS NULL',args:[v.dob,v.now,v.notificationConsent,v.cookieConsent,v.now,v.id]},{sql:'INSERT INTO user_credentials(user_id,password_hash,password_salt,kdf,kdf_params,updated_at) VALUES(?,?,?,?,?,?)',args:[v.id,v.hash,v.salt,'PBKDF2-SHA256',v.params,v.now]}]);
   await this.createSession(v.id,v.sessionId,v.tokenHash,v.now);
   try{await this.audit(v.id,'ACCOUNT_REGISTRATION_REPAIRED',v.now);}catch(e){console.error('registration repair audit failed',e);}
  }
