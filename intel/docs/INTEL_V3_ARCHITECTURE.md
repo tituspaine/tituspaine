@@ -28,3 +28,6 @@ URLs are authoritative. Mobile primary navigation is Home, Latest, Search, Follo
 
 ## Schema
 Production is currently applied through 0010. Migration 0011_claims_feeds_moderation is repository-implemented and must be applied before code paths that use claims/custom feeds/contextual moderation are considered production-ready.
+
+## Visual identity and information color
+INTEL uses an approximately 85/15 neutral-to-signal visual balance. Cobalt is the product/interaction identity. Emerald denotes supported/verified states, amber disputed/source-request states, crimson corrections/serious moderation states, navy public-record/evidence context, violet analysis/entity context, and orange-red genuinely fresh/breaking activity. These colors are semantic UI signals, never truth scores. Investigation accents are deterministic presentation identity only and do not encode verification or importance. Evidence, claims, entities and community posts intentionally have distinct visual grammar so mixed feeds remain scannable without becoming a dashboard of nested cards. Dark mode is intentionally not part of this pass.
