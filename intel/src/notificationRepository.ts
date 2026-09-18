@@ -12,9 +12,9 @@ export class NotificationRepository {
   }
 
   async notifyFollowers(investigationId:string,updateId:string,exclude?:string) {
-    // Bound synchronous fan-out so publishing latency cannot grow with follower count.
-    // Larger audiences still see the update in Following; future queue-based fan-out can
-    // continue from the deterministic user_id ordering without changing the core write.
+    // Best-effort notification materialization is intentionally bounded. Following remains
+    // pull-based and authoritative for large audiences, so notification fan-out never gates
+    // the publishing transaction or becomes the only way followers can discover an update.
     const rows=await this.db.execute<{user_id:string}>('SELECT user_id FROM investigation_follows WHERE investigation_id=? ORDER BY user_id LIMIT 201',[investigationId]);
     const recipients=rows.rows.filter(x=>x.user_id!==exclude).slice(0,200);
     if(!recipients.length)return {delivered:0,truncated:false};
