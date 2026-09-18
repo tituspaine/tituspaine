@@ -1,5 +1,6 @@
 name: INTEL CI
 on:
+  workflow_dispatch:
   push:
     branches: [intel-v2-build]
     paths: ['intel/**', '.github/workflows/intel-ci.yml']
@@ -7,9 +8,13 @@ on:
     paths: ['intel/**', '.github/workflows/intel-ci.yml']
 permissions:
   contents: read
+concurrency:
+  group: intel-ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: intel
@@ -18,6 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
+          cache: npm
+          cache-dependency-path: intel/package-lock.json
+      - run: npm ci --no-audit --no-fund
       - run: npm run typecheck
       - run: npm test
