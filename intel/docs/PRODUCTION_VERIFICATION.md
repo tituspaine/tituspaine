@@ -27,7 +27,7 @@ Do not rerun already-applied migrations manually. Do not expose VAPID private ke
 
 ## Acceptance matrix
 Anonymous: Home sorting, Search filters, Investigation tabs, opened Post, comment permalink/thread, Evidence, Entity, Relationship and public profile behavior.
-Authenticated: registration/DOB, login/logout, Follow/Save/Like, contribution/reply/edit, evidence/claim links, Following, Notifications, Account activity/Saved pagination, privacy, contact-photo crop, custom feeds, friends/messages/shares/attachments.
+Authenticated: registration/DOB, login/logout, Follow/Save/Like, contribution/reply/edit, evidence/claim links, Following, Notifications, Account activity/Saved pagination, privacy, direct contact-photo upload, custom feeds, friends/messages/shares/attachments.
 Moderator: remove/restore, moderation flags, queue and audit behavior.
 Admin: Operations, Publishing, Evidence/Intelligence, Moderation, System Health, Export and database validation.
 Mobile: five-destination bottom nav, iPhone safe areas, keyboard/composer stability, installed-PWA notification onboarding, Back/Forward, refresh/deep links, progressive disclosure and long-content handling.
