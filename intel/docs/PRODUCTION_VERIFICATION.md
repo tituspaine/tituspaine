@@ -4,7 +4,7 @@ Production: https://intel.tituspaine.com
 Branch: intel-v2-build
 
 ## Verified production database boundary
-On 2026-09-18 production Turso confirmed migrations 0001-0014 and returned ok=true from the production validator. Migration 0014_notification_fanout_outbox was applied while 0001-0013 remained already applied. The successful checks included migrations_0001_0014, social_notification_schema, notification_fanout_outbox, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback and cleanup.
+On 2026-09-18 production Turso confirmed migrations 0001-0014 and returned ok=true from the production validator. Migration 0014_notification_fanout_outbox was applied while 0001-0013 remained already applied. Migration 0015_fanout_retry_health remains pending. After it is applied, require migrations_0001_0015. The prior successful checks included migrations_0001_0014, social_notification_schema, notification_fanout_outbox, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback and cleanup.
 
 ## Verification states
 IMPLEMENTED: present on intel-v2-build.
