@@ -32,6 +32,6 @@ describe('endpoint rate budgets',()=>{
 
 
 describe('community scalability contracts',()=>{
- it('keeps follower notification fanout bounded and chunked',async()=>{const {NotificationRepository}=await import('../src/notificationRepository');const batches:any[]=[];const db:any={execute:async(sql:string)=>sql.includes('LIMIT 201')?{rows:Array.from({length:201},(_,i)=>({user_id:`u${i}`}))}:{rows:[]},batch:async(x:any[])=>{batches.push(x);return[];}};const result=await new NotificationRepository(db).notifyFollowers('i','up','actor');expect(result.delivered).toBe(200);expect(result.truncated).toBe(true);expect(batches.length).toBe(4);expect(batches.every(x=>x.length<=50)).toBe(true);});
+ it('uses the durable leased outbox as the only follower fanout path',async()=>{const {NotificationRepository}=await import('../src/notificationRepository');expect('notifyFollowers' in NotificationRepository.prototype).toBe(false);const source=await import('node:fs').then(fs=>fs.readFileSync(new URL('../src/fanoutRepository.ts',import.meta.url),'utf8'));expect(source).toContain('notification_outbox');expect(source).toContain('lease_until');expect(source).toContain('attempts');expect(source).toContain('LIMIT ?');});
  it('keeps all server collection budgets finite',()=>{expect([50,60,80,100,120,200].every(Number.isFinite)).toBe(true);});
 });
