@@ -8,6 +8,7 @@ const hot=readFileSync(new URL('../migrations-turso/0010_hot_path_indexes.sql',i
 const community=readFileSync(new URL('../migrations-turso/0011_claims_feeds_moderation.sql',import.meta.url),'utf8');
 const socialNotifications=readFileSync(new URL('../migrations-turso/0013_social_notification_preferences.sql',import.meta.url),'utf8');
 const fanout=readFileSync(new URL('../migrations-turso/0014_notification_fanout_outbox.sql',import.meta.url),'utf8');
+const fanoutRetry=readFileSync(new URL('../migrations-turso/0015_fanout_retry_health.sql',import.meta.url),'utf8');
 
 describe('V3 production database invariants',()=>{
  it('makes published comments immutable',()=>{expect(core).toContain('CREATE TRIGGER comments_no_content_update');expect(core).toContain('CREATE TRIGGER comments_no_delete');});
@@ -20,7 +21,7 @@ describe('V3 production database invariants',()=>{
  it('indexes high-growth user and follower hot paths',()=>{for(const name of ['idx_notifications_user_time','idx_investigation_follows_investigation_user','idx_comments_author_time','idx_evidence_creator_time','idx_investigations_public_updated'])expect(hot).toContain(name);});
  it('separates claims, evidence support, custom feeds and moderation state',()=>{for(const table of ['claims','claim_evidence','custom_feeds','custom_feed_investigations','content_moderation_state'])expect(community).toContain(`CREATE TABLE IF NOT EXISTS ${table}`);expect(community).toContain('idx_comments_post_best');});
  it('indexes social notification preferences and unread reads',()=>{expect(socialNotifications).toContain('CREATE TABLE social_notification_preferences');expect(socialNotifications).toContain('idx_notifications_user_unread_time');});
- it('persists resumable follower fanout jobs',()=>{expect(fanout).toContain('CREATE TABLE notification_fanout_jobs');expect(fanout).toContain('UNIQUE(investigation_id,update_id)');expect(fanout).toContain('idx_notification_fanout_jobs_status');expect(fanout).toContain('lease_owner');expect(fanout).toContain('lease_expires_at');expect(fanout).toContain('idx_private_messages_sender_time');});
+ it('persists resumable follower fanout jobs',()=>{expect(fanout).toContain('CREATE TABLE notification_fanout_jobs');expect(fanout).toContain('UNIQUE(investigation_id,update_id)');expect(fanout).toContain('idx_notification_fanout_jobs_status');expect(fanout).toContain('lease_owner');expect(fanout).toContain('lease_expires_at');expect(fanout).toContain('idx_private_messages_sender_time');expect(fanout).not.toContain('last_error');expect(fanoutRetry).toContain('ADD COLUMN attempts');expect(fanoutRetry).toContain('ADD COLUMN last_error');expect(fanoutRetry).toContain('idx_notification_fanout_jobs_retry');});
  it('keeps entity search one row per entity',()=>{expect(search).toContain("SELECT 'ENTITY',e.id,NULL");expect(search).not.toContain("SELECT 'ENTITY',e.id,ie.investigation_id");});
  it('synchronizes mutable searchable objects',()=>{expect(search).toContain('CREATE TRIGGER search_update_update');expect(search).toContain('CREATE TRIGGER search_evidence_update');expect(search).toContain('CREATE TRIGGER search_alias_delete');});
 });
