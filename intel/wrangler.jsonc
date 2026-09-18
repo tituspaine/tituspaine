@@ -4,13 +4,39 @@
   "main": "src/entry.ts",
   "compatibility_date": "2026-09-16",
   "workers_dev": true,
-  "triggers": { "crons": ["* * * * *"] },
-  "assets": { "directory": "public", "run_worker_first": false },
+  "triggers": {
+    "crons": [
+      "* * * * *"
+    ]
+  },
+  "assets": {
+    "directory": "public",
+    "run_worker_first": false
+  },
   "vars": {
     "APP_ORIGIN": "https://intel.tituspaine.com",
     "ENVIRONMENT": "production",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAE4y25YkssM9TbSp"
   },
-  "r2_buckets": [{ "binding": "EVIDENCE", "bucket_name": "intel-evidence" }],
-  "secrets": { "required": ["TURNSTILE_SECRET_KEY", "SESSION_PEPPER", "TURSO_VALIDATION_BOOTSTRAP_TOKEN", "TURSO_PRODUCTION_DATABASE_URL", "TURSO_PRODUCTION_AUTH_TOKEN", "WEB_PUSH_PUBLIC_KEY", "WEB_PUSH_PRIVATE_KEY", "WEB_PUSH_SUBJECT"] }
+  "r2_buckets": [
+    {
+      "binding": "EVIDENCE",
+      "bucket_name": "intel-evidence"
+    }
+  ],
+  "secrets": {
+    "required": [
+      "TURNSTILE_SECRET_KEY",
+      "SESSION_PEPPER",
+      "TURSO_VALIDATION_BOOTSTRAP_TOKEN",
+      "TURSO_PRODUCTION_DATABASE_URL",
+      "TURSO_PRODUCTION_AUTH_TOKEN",
+      "WEB_PUSH_PUBLIC_KEY",
+      "WEB_PUSH_PRIVATE_KEY",
+      "WEB_PUSH_SUBJECT"
+    ]
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
 }
