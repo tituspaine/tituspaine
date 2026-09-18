@@ -1,0 +1,43 @@
+PRAGMA foreign_keys=ON;
+
+CREATE TRIGGER IF NOT EXISTS search_comment_insert AFTER INSERT ON comments
+WHEN new.visibility_status='VISIBLE'
+BEGIN
+  INSERT INTO search_index(object_type,object_id,investigation_id,title,body,aliases)
+  VALUES('COMMENT',new.id,new.investigation_id,COALESCE(new.description,''),new.content,'');
+END;
+CREATE TRIGGER IF NOT EXISTS search_comment_update AFTER UPDATE OF description,content,visibility_status ON comments
+BEGIN
+  DELETE FROM search_index WHERE object_type='COMMENT' AND object_id=old.id;
+  INSERT INTO search_index(object_type,object_id,investigation_id,title,body,aliases)
+  SELECT 'COMMENT',new.id,new.investigation_id,COALESCE(new.description,''),new.content,''
+  WHERE new.visibility_status='VISIBLE';
+END;
+CREATE TRIGGER IF NOT EXISTS search_comment_delete AFTER DELETE ON comments
+BEGIN DELETE FROM search_index WHERE object_type='COMMENT' AND object_id=old.id; END;
+
+CREATE TRIGGER IF NOT EXISTS search_user_insert AFTER INSERT ON users
+WHEN new.status='ACTIVE'
+BEGIN
+  INSERT INTO search_index(object_type,object_id,investigation_id,title,body,aliases)
+  VALUES('USER',new.id,NULL,new.username,'','');
+END;
+CREATE TRIGGER IF NOT EXISTS search_user_update AFTER UPDATE OF username,status ON users
+BEGIN
+  DELETE FROM search_index WHERE object_type='USER' AND object_id=old.id;
+  INSERT INTO search_index(object_type,object_id,investigation_id,title,body,aliases)
+  SELECT 'USER',new.id,NULL,new.username,'','' WHERE new.status='ACTIVE';
+END;
+
+INSERT INTO search_index(object_type,object_id,investigation_id,title,body,aliases)
+SELECT 'COMMENT',c.id,c.investigation_id,COALESCE(c.description,''),c.content,''
+FROM comments c JOIN investigations i ON i.id=c.investigation_id
+WHERE c.visibility_status='VISIBLE' AND i.published_at IS NOT NULL
+AND NOT EXISTS(SELECT 1 FROM search_index s WHERE s.object_type='COMMENT' AND s.object_id=c.id);
+
+INSERT INTO search_index(object_type,object_id,investigation_id,title,body,aliases)
+SELECT 'USER',u.id,NULL,u.username,'','' FROM users u
+WHERE u.status='ACTIVE'
+AND NOT EXISTS(SELECT 1 FROM search_index s WHERE s.object_type='USER' AND s.object_id=u.id);
+
+INSERT OR IGNORE INTO schema_migrations(version,applied_at) VALUES('0008_unified_search',unixepoch()*1000);
