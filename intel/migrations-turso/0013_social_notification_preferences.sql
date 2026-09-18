@@ -14,4 +14,4 @@ CREATE INDEX idx_notifications_user_unread_time
 ON notifications(user_id,read_at,created_at DESC,id DESC);
 
 INSERT OR IGNORE INTO schema_migrations(version,applied_at)
-VALUES('0013_social_social_notification_preferences',unixepoch()*1000);
+VALUES('0013_social_notification_preferences',unixepoch()*1000);
