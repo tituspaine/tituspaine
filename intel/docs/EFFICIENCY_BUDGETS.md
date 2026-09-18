@@ -10,7 +10,9 @@ Entity dossier: each contextual collection <=50; evidence/investigation context 
 No recursive whole-thread read. No OFFSET on high-growth chronological collections.
 
 ## Write budgets
-Core contribution/reaction/moderation writes remain transactional and bounded. Notifications, escalation and other secondary work must not invalidate a persisted core action. Follower notification fan-out uses a durable outbox. Each drain is bounded to <=100 recipients per batch, uses deterministic notification IDs for idempotency, advances a user-id cursor, and is resumed by scheduled Worker execution. Following remains pull-authoritative.
+Core contribution/reaction/moderation writes remain transactional and bounded. Notifications, escalation and other secondary work must not invalidate a persisted core action. Follower notification fan-out uses a durable outbox. Each drain is bounded to <=100 recipients per batch, uses deterministic notification IDs for idempotency, leases a job before advancing its user-id cursor to prevent concurrent cursor regression, and is resumed by scheduled Worker execution. Following remains pull-authoritative.
+
+Private message attachments are <=10 MB each and additionally capped at 50 files / 100 MB per sender over a rolling 24-hour window. MIME signatures are checked before R2 storage.
 
 ## Passive activity
 Recently viewed and recent searches stay browser-local and bounded. Do not create a Turso write for ordinary page views or searches.
