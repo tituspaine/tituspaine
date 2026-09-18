@@ -12,8 +12,6 @@ CREATE TABLE notification_fanout_jobs(
   status TEXT NOT NULL DEFAULT 'PENDING' CHECK(status IN('PENDING','RUNNING','DONE')),
   lease_owner TEXT,
   lease_expires_at INTEGER,
-  attempts INTEGER NOT NULL DEFAULT 0,
-  last_error TEXT,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
   UNIQUE(investigation_id,update_id)
