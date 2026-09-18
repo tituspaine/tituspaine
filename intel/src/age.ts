@@ -1,0 +1,2 @@
+export function parsePrivateDob(v:string){if(!/^\d{4}-\d{2}-\d{2}$/.test(v))return null;const[y,m,d]=v.split('-').map(Number),x=new Date(Date.UTC(y,m-1,d));return x.getUTCFullYear()===y&&x.getUTCMonth()===m-1&&x.getUTCDate()===d?x:null;}
+export function isAdultDob(v:string,now=new Date()){const dob=parsePrivateDob(v);if(!dob||dob.getTime()>now.getTime())return false;const cutoff=new Date(Date.UTC(now.getUTCFullYear()-18,now.getUTCMonth(),now.getUTCDate()));return dob<=cutoff;}
