@@ -4,9 +4,7 @@ Production: https://intel.tituspaine.com
 Branch: intel-v2-build
 
 ## Verified production database boundary
-On 2026-09-18 production Turso confirmed migrations 0001-0013 and returned ok=true from the production validator. The successful checks included migrations_0001_0013, social_notification_schema, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback and cleanup.
-
-Migration 0014_notification_fanout_outbox is the only newer schema migration. It must not be described as production-applied until the administrator migration output confirms it.
+On 2026-09-18 production Turso confirmed migrations 0001-0014 and returned ok=true from the production validator. Migration 0014_notification_fanout_outbox was applied while 0001-0013 remained already applied. The successful checks included migrations_0001_0014, social_notification_schema, notification_fanout_outbox, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback and cleanup.
 
 ## Verification states
 IMPLEMENTED: present on intel-v2-build.
@@ -17,15 +15,12 @@ PRODUCTION VERIFIED: behavior is exercised successfully on intel.tituspaine.com.
 ## Required final production sequence
 1. Require green exact-HEAD CI.
 2. Deploy that exact intel-v2-build revision to the separate INTEL Worker only.
-3. Open /admin/database-migration as an INTEL administrator.
-4. Apply pending migration 0014_notification_fanout_outbox.
-5. Run production schema validation and require ok=true, migrations_0001_0014 and notification_fanout_outbox.
-6. Confirm System Health reports Push configured: yes and a healthy fanout backlog.
-7. From an iPhone, add INTEL to the Home Screen, launch the installed web app, and enable device notifications from Account.
-8. With a second adult test account, verify friend request/accept, profile privacy, conversation creation, text, image, PDF/text attachment, canonical INTEL share, unread/read synchronization, blocking/unblocking and a background push deep-link into the correct conversation.
-9. Exercise browser Back/Forward repeatedly across investigation tabs, posts, comments, Search, Messages, Account and deep links.
-10. Exercise anonymous/authenticated/moderator/admin smoke paths without creating junk permanent records.
-11. Record the exact deployed release SHA and only then mark the final revision PRODUCTION VERIFIED.
+3. Confirm System Health reports Push configured: yes and a healthy fanout backlog.
+4. From an iPhone, add INTEL to the Home Screen, launch the installed web app, and enable device notifications from Account.
+5. With a second adult test account, verify friend request/accept, profile privacy, conversation creation, text, image, PDF/text attachment, canonical INTEL share, unread/read synchronization, blocking/unblocking and a background push deep-link into the correct conversation.
+6. Exercise browser Back/Forward repeatedly across investigation tabs, posts, comments, Search, Messages, Account and deep links.
+7. Exercise anonymous/authenticated/moderator/admin smoke paths without creating junk permanent records.
+8. Record the exact deployed release SHA and only then mark the final revision PRODUCTION VERIFIED.
 
 ## Safety and non-destructive rules
 Do not rerun already-applied migrations manually. Do not expose VAPID private keys, Turso tokens, session secrets or Turnstile secrets. Do not create junk production records for synthetic load tests. Destructive concurrency/load testing belongs in test environments.
