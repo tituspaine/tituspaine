@@ -30,3 +30,7 @@ The final verification run must target the exact final intel-v2-build HEAD. Supe
 
 ## Production database validation evidence
 On 2026-09-18 production returned ok=true for validator runId `180fe722-0c6e-47d0-9ca7-9596f2ab76f6`. Checks passed: migrations_0001_0011, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback, cleanup.
+
+
+## 2026-09-18 social schema verification
+Production Turso migration output confirmed `0012_social_messaging_privacy:applied`. The administrator validation run returned `ok: true` with `migrations_0001_0012`, claims/feeds/moderation schema, hot-path indexes, investigation teams, atomic graph write, relationship FTS/provenance, claim write, transaction rollback, and cleanup checks passing. Application/UI smoke verification remains a separate deployment boundary.
