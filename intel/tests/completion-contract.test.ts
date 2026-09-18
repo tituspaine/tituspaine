@@ -47,3 +47,11 @@ describe('product architecture boundaries',()=>{
  it('keeps claim state independent from comment likes',()=>{const m=read('migrations-turso/0011_claims_feeds_moderation.sql');expect(m).toContain("CHECK(status IN('UNVERIFIED','SUPPORTED','DISPUTED','CORRECTED'))");expect(read('src/claimRepository.ts')).not.toContain('comment_likes');});
  it('keeps passive recents browser-local',()=>{const js=read('public/intel.js');expect(js).toContain('localStorage.setItem(RECENT_KEY');expect(js).not.toContain('/api/recent');});
 });
+
+
+describe('INTEL visual identity contracts',()=>{
+ it('uses semantic signal colors without conflating engagement and verification',()=>{const v=read('src/views.ts');expect(v).toContain('--emerald:');expect(v).toContain('--amber:');expect(v).toContain('--crimson:');expect(v).toContain('--violet:');expect(v).toContain('.claim-supported');expect(v).toContain('.claim-disputed');});
+ it('gives investigations stable lightweight visual identity',()=>{const v=read('src/views.ts');expect(v).toContain('data-accent=');expect(v).toContain('feed-avatar');expect(read('src/investigationViews.ts')).toContain('investigation-community-id');});
+ it('visually distinguishes evidence claims and flair',()=>{const v=read('src/views.ts');expect(v).toContain('.evidence-card');expect(v).toContain('data-flair*="BREAKING"');expect(read('src/postViews.ts')).toContain('source-link');});
+ it('does not introduce dark mode',()=>{expect(read('src/views.ts')).not.toContain('prefers-color-scheme:dark');});
+});
