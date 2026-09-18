@@ -10,6 +10,8 @@ export interface Env {
   ADMIN_USER_IDS?: string;
   /** Optional VAPID public key. Push subscriptions can be registered only when configured. */
   WEB_PUSH_PUBLIC_KEY?: string;
+  WEB_PUSH_PRIVATE_KEY?: string;
+  WEB_PUSH_SUBJECT?: string;
   /** Operational migration token. Never expose or commit its value. */
   TURSO_VALIDATION_BOOTSTRAP_TOKEN?: string;
   /** Optional isolated validation database credentials. */
@@ -33,4 +35,5 @@ export interface RequestContext {
   url: URL;
   user: SessionUser | null;
   db: IntelDatabase;
+  executionCtx?: ExecutionContext;
 }
