@@ -32,6 +32,6 @@ describe('endpoint rate budgets',()=>{
 
 
 describe('community scalability contracts',()=>{
- it('keeps follower notification fanout bounded and chunked',async()=>{const src=await import('../src/notificationRepository');expect(src.NotificationRepository).toBeTruthy();});
+ it('keeps follower notification fanout bounded and chunked',async()=>{const {NotificationRepository}=await import('../src/notificationRepository');const batches:any[]=[];const db:any={execute:async(sql:string)=>sql.includes('LIMIT 201')?{rows:Array.from({length:201},(_,i)=>({user_id:`u${i}`}))}:{rows:[]},batch:async(x:any[])=>{batches.push(x);return[];}};const result=await new NotificationRepository(db).notifyFollowers({investigation:'i',update:'up',actor:'actor',title:'t',now:1,prefix:'p'});expect(result.delivered).toBe(200);expect(result.truncated).toBe(true);expect(batches.length).toBe(4);expect(batches.every(x=>x.length<=50)).toBe(true);});
  it('keeps all server collection budgets finite',()=>{expect([50,60,80,100,120,200].every(Number.isFinite)).toBe(true);});
 });
