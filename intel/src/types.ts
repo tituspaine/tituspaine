@@ -8,6 +8,8 @@ export interface Env {
   TURNSTILE_SECRET_KEY: string;
   SESSION_PEPPER: string;
   ADMIN_USER_IDS?: string;
+  /** Optional VAPID public key. Push subscriptions can be registered only when configured. */
+  WEB_PUSH_PUBLIC_KEY?: string;
   /** Operational migration token. Never expose or commit its value. */
   TURSO_VALIDATION_BOOTSTRAP_TOKEN?: string;
   /** Optional isolated validation database credentials. */
