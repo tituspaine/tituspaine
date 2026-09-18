@@ -21,3 +21,6 @@ Mobile: five-destination bottom nav, iPhone safe area, Back/Forward, refresh/dee
 
 ## Non-destructive rule
 Do not create junk production records for testing. Destructive concurrency/load tests belong in local/test environments.
+
+## Final repository verification
+Final repository verification must be performed on the exact final HEAD after documentation and validator cleanup. A successful earlier run is evidence for that earlier revision only; it is not silently promoted to a newer commit. Production deployment and production smoke verification remain independent gates.
