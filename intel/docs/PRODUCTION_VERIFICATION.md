@@ -32,5 +32,18 @@ The final verification run must target the exact final intel-v2-build HEAD. Supe
 On 2026-09-18 production returned ok=true for validator runId `180fe722-0c6e-47d0-9ca7-9596f2ab76f6`. Checks passed: migrations_0001_0011, claims_feeds_moderation_schema, hot_path_indexes, investigation_teams_schema, atomic_graph_write, relationship_fts, relationship_provenance, claim_write, atomic_batch_rollback, cleanup.
 
 
+## Current social completion gate
+Production 0012 is verified. Migration 0013_social_notification_preferences is branch-complete but pending production application. The final Worker revision must be deployed after exact-HEAD CI succeeds. Browser push subscription registration and the service worker are implemented; actual background Web Push delivery remains an external configuration gate because production VAPID signing credentials have not been provisioned/verified.
+
+## Required production sequence
+1. Confirm exact final intel-v2-build HEAD CI succeeds.
+2. Deploy that exact branch revision to the separate INTEL Worker only.
+3. Open /admin/database-migration while authenticated as an INTEL administrator.
+4. Apply pending migrations; confirm 0013_social_notification_preferences:applied.
+5. Run Validate production schema; require ok=true and migrations_0001_0013 plus social_notification_schema.
+6. Configure the Web Push public/private VAPID signing credentials in the INTEL Worker environment without committing secrets.
+7. Redeploy if the environment requires it, enable device notifications from Account, and test a friend request, friend acceptance, direct message, attachment, private INTEL share and notification deep link on a real installed iPhone web app.
+8. Run the full anonymous/authenticated/moderator/admin/mobile smoke matrix and record the exact deployed release SHA.
+
 ## 2026-09-18 social schema verification
 Production Turso migration output confirmed `0012_social_messaging_privacy:applied`. The administrator validation run returned `ok: true` with `migrations_0001_0012`, claims/feeds/moderation schema, hot-path indexes, investigation teams, atomic graph write, relationship FTS/provenance, claim write, transaction rollback, and cleanup checks passing. Application/UI smoke verification remains a separate deployment boundary.
