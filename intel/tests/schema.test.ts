@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 const core=readFileSync(new URL('../migrations-turso/0001_core.sql',import.meta.url),'utf8');
 const search=readFileSync(new URL('../migrations-turso/0002_search.sql',import.meta.url),'utf8');
 const scaling=readFileSync(new URL('../migrations-turso/0009_post_thread_scaling.sql',import.meta.url),'utf8');
+const hot=readFileSync(new URL('../migrations-turso/0010_hot_path_indexes.sql',import.meta.url),'utf8');
 
 describe('V3 production database invariants',()=>{
  it('makes published comments immutable',()=>{expect(core).toContain('CREATE TRIGGER comments_no_content_update');expect(core).toContain('CREATE TRIGGER comments_no_delete');});
@@ -13,6 +14,7 @@ describe('V3 production database invariants',()=>{
  it('keeps roles server-side',()=>expect(core).toContain("role IN('ADMIN','MODERATOR','PUBLISHER')"));
  it('uses FTS5 for the production corpus',()=>expect(search).toContain('CREATE VIRTUAL TABLE search_index USING fts5'));
  it('indexes root and parent thread reads for bounded post pages',()=>{expect(scaling).toContain('idx_comments_root_time');expect(scaling).toContain('idx_comments_parent_time');expect(scaling).toContain('idx_comments_investigation_root_rank');});
+ it('indexes high-growth user and follower hot paths',()=>{for(const name of ['idx_notifications_user_time','idx_investigation_follows_investigation_user','idx_comments_author_time','idx_evidence_creator_time','idx_investigations_public_updated'])expect(hot).toContain(name);});
  it('keeps entity search one row per entity',()=>{expect(search).toContain("SELECT 'ENTITY',e.id,NULL");expect(search).not.toContain("SELECT 'ENTITY',e.id,ie.investigation_id");});
  it('synchronizes mutable searchable objects',()=>{expect(search).toContain('CREATE TRIGGER search_update_update');expect(search).toContain('CREATE TRIGGER search_evidence_update');expect(search).toContain('CREATE TRIGGER search_alias_delete');});
 });
