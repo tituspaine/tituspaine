@@ -1,5 +1,13 @@
 (()=>{'use strict';
 const jsonHeaders={Accept:'application/json','X-Requested-With':'fetch'};
+const RECENT_KEY='intel:recent:v1',SEARCH_KEY='intel:searches:v1',DENSITY_KEY='intel:density';
+const safeJson=(raw,fallback)=>{try{return JSON.parse(raw)||fallback}catch{return fallback}};
+const recent=document.querySelector('[data-recent-type]');if(recent){const item={type:recent.dataset.recentType,id:recent.dataset.recentId,label:recent.dataset.recentLabel||document.title,url:location.pathname+location.search,at:Date.now()},items=safeJson(localStorage.getItem(RECENT_KEY),[]).filter(x=>x&&x.url!==item.url).slice(0,19);localStorage.setItem(RECENT_KEY,JSON.stringify([item,...items]));}
+const density=localStorage.getItem(DENSITY_KEY)||'comfortable';document.documentElement.dataset.density=density;
+const searchForm=document.querySelector('form.search');if(searchForm)searchForm.addEventListener('submit',()=>{const q=searchForm.querySelector('input[name="q"]')?.value?.trim();if(q){const items=safeJson(localStorage.getItem(SEARCH_KEY),[]).filter(x=>x!==q).slice(0,9);localStorage.setItem(SEARCH_KEY,JSON.stringify([q,...items]));}});
+document.addEventListener('keydown',e=>{const el=e.target,typing=el instanceof HTMLInputElement||el instanceof HTMLTextAreaElement||el?.isContentEditable;if(e.key==='/'&&!typing){e.preventDefault();location.href='/search';}if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();location.href='/search?command=1';}if(e.key==='Escape'){document.querySelectorAll('details[open].comment-more').forEach(x=>x.removeAttribute('open'));document.querySelectorAll('.inline-reply-form:not([hidden])').forEach(x=>x.hidden=true);}});
+document.addEventListener('toggle',e=>{const d=e.target;if(d instanceof HTMLDetailsElement&&d.matches('.comment-more')&&d.open)document.querySelectorAll('details.comment-more[open]').forEach(x=>{if(x!==d)x.removeAttribute('open')});},true);
+
 const announce=(el,msg)=>{let n=el.querySelector('.interaction-feedback');if(!n){n=document.createElement('span');n.className='interaction-feedback';n.setAttribute('role','status');el.append(n);}n.textContent=msg;setTimeout(()=>{if(n)n.textContent='';},1800);};
 async function mutate(form){return fetch(form.action,{method:'POST',body:new FormData(form),headers:jsonHeaders,credentials:'same-origin'});}
 document.addEventListener('submit',async e=>{
