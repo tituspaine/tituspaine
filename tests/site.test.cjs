@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
-const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x => x[1]).filter(Boolean);
+const css = fs.readFileSync(path.join(__dirname, '../editorial.css'), 'utf8');
+const scripts = [...html.matchAll(/<script(?![^>]*type="application\/ld\+json")(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x => x[1]).filter(Boolean);
 
 function dom() {
   const nodes = new Map();
@@ -129,5 +130,45 @@ test('new game cancels a queued computer turn before it can touch reset state', 
 
 test('status and reduced-motion semantics are present', () => {
   assert.match(html, /id="chessStatus"[^>]*role="status"[^>]*aria-live="polite"/);
-  assert.match(html, /prefers-reduced-motion:reduce\)\{\*\{animation:none!important;transition:none!important/);
+  assert.match(css, /prefers-reduced-motion:reduce\)\{\*\{animation:none!important;transition:none!important/);
+});
+
+test('editorial navigation has mobile parity and every local destination exists', () => {
+  const menus = [...html.matchAll(/<nav[^>]*>([\s\S]*?)<\/nav>/g)].map(m => [...m[1].matchAll(/href="([^"]+)"/g)].map(x => x[1]));
+  assert.equal(menus.length, 2);
+  assert.deepEqual(menus[0], menus[1]);
+  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+  const ids = [...markup.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
+  assert.equal(ids.length, new Set(ids).size, 'DOM IDs are unique');
+  for (const [, target] of html.matchAll(/href="#([^"]+)"/g)) assert.ok(ids.includes(target), target);
+  for (const target of ['#ventures','#builds','#about','#code','#legal-access','#fun-projects','#contact']) assert.ok(menus[0].includes(target));
+});
+
+test('identity, portrait, canonical and usable no-JavaScript paths are present', () => {
+  assert.equal((html.match(/<h1\b/g) || []).length, 1);
+  assert.match(html, /<h1 id="intro-title">Titus Russell/);
+  assert.match(html, /rel="canonical" href="https:\/\/tituspaine.com\/"/);
+  assert.match(html, /class="skip-link" href="#top"/);
+  assert.match(html, /<img[^>]*alt="Titus Paine"[^>]*width="1254"[^>]*height="1254"/);
+  assert.match(html, /<details class="mobile-menu">/);
+  assert.doesNotMatch(html, /user-scalable=no|maximum-scale=1/);
+  assert.ok(html.indexOf('id="contact"') > html.indexOf('id="chess"'));
+  for (const host of ['orendrix.com','wet1d.com','dcotaxpayers.com','rrbible.com','github.com/tituspaine/os-oracle','tituspaine.legalshieldassociate.com','doublephone.tituspaine.com','tituspaine.github.io/Daily/']) assert.ok(html.includes(host), host);
+});
+
+test('search metadata describes the real person and only the real homepage', () => {
+  const data = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  assert.equal(data['@type'], 'Person');
+  assert.equal(data.name, 'Titus Paine');
+  assert.equal(data.url, 'https://tituspaine.com/');
+  const sitemap = fs.readFileSync(path.join(__dirname, '../sitemap.xml'), 'utf8');
+  assert.match(sitemap, /<loc>https:\/\/tituspaine.com\/<\/loc>/);
+  assert.doesNotMatch(sitemap, /intel|legal-access|chess/);
+});
+
+test('project grid class matches responsive stylesheet', () => {
+  assert.match(html, /class="build-grid"/);
+  assert.match(css, /\.build-grid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(css, /\.build-grid\{grid-template-columns:1fr\}/);
+  assert.doesNotMatch(css, /\.builds-grid/);
 });

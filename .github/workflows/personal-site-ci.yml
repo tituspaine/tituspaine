@@ -2,10 +2,10 @@ name: Personal site checks
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'tests/**', '.github/workflows/personal-site-ci.yml']
+    paths: ['index.html', 'editorial.css', 'tests/**', '.github/workflows/personal-site-ci.yml']
   pull_request:
     branches: [main]
-    paths: ['index.html', 'tests/**', '.github/workflows/personal-site-ci.yml']
+    paths: ['index.html', 'editorial.css', 'tests/**', '.github/workflows/personal-site-ci.yml']
 permissions:
   contents: read
 jobs:
