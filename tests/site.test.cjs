@@ -6,10 +6,11 @@ const path = require('node:path');
 const home = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 const legal = fs.readFileSync(path.join(__dirname, '../legal-access/index.html'), 'utf8');
 const experiments = fs.readFileSync(path.join(__dirname, '../experiments/index.html'), 'utf8');
-const html = home + legal + experiments;
+const chessPage=fs.readFileSync(path.join(__dirname,'../chess/index.html'),'utf8');
+const html = home + legal + experiments + chessPage;
 const css = fs.readFileSync(path.join(__dirname, '../editorial.css'), 'utf8') + fs.readFileSync(path.join(__dirname, '../interactive.css'), 'utf8');
 const inline = value => [...value.matchAll(/<script(?![^>]*type="application\/ld\+json")(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x => x[1]).filter(Boolean);
-const scripts = [fs.readFileSync(path.join(__dirname, '../site.js'), 'utf8'), ...inline(experiments), ...inline(legal)];
+const scripts = [fs.readFileSync(path.join(__dirname, '../site.js'), 'utf8'), fs.readFileSync(path.join(__dirname,'../chess.js'),'utf8'), ...inline(legal)];
 
 function dom() {
   const nodes = new Map();
@@ -88,7 +89,7 @@ test('legal drag uses unitless distance with dimensionally valid CSS transforms'
   assert.equal(nodes.get('legalCount').textContent, '02 / 05');
 });
 
-function chess() {
+function chess(options={}) {
   const { nodes, document, Element } = dom();
   for (const id of ['chessBoard','chessStatus','chessControls','chessOverlay','chessCard','playChess']) new Element('div', id);
   const modes = ['easy','medium','hard','legendary'].map(level => { const node = new Element('button'); node.dataset.level=level; return node; });
@@ -98,10 +99,15 @@ function chess() {
     get(sq) { return sq === 'e2' ? { color: 'w', type: 'p' } : null; }
     turn() { return 'w'; }
     in_check() { return false; }
-    game_over() { return false; }
-    moves() { moves++; return []; }
+    game_over() { return !!options.ended; }
+    in_checkmate(){return !!options.mate;}
+    move(){return {};}
+    board(){return Array.from({length:8},()=>Array(8).fill(null));}
+    in_draw(){return !options.mate;}
+    undo(){}
+    moves() { moves++; return options.ended?[{to:'e4',flags:''}]:[]; }
   }
-  new vm.Script(scripts[1]).runInNewContext({ document, Chess, requestAnimationFrame: fn => frames.push(fn), setTimeout: fn => { timers.set(++nextTimer,fn); return nextTimer; }, clearTimeout: id => timers.delete(id) });
+  new vm.Script(scripts[1]).runInNewContext({ document, Chess, window: options.window || {location:{href:''}}, Math:options.math || Math, requestAnimationFrame: fn => frames.push(fn), setTimeout: fn => { timers.set(++nextTimer,fn); return nextTimer; }, clearTimeout: id => timers.delete(id) });
   return { nodes, modes, frames, timers, get moves() { return moves; } };
 }
 
@@ -137,7 +143,7 @@ test('status and reduced-motion semantics are present', () => {
   assert.match(css, /prefers-reduced-motion:reduce\)\{\*\{animation:none!important;transition:none!important/);
 });
 
-const pagePaths = ['index.html','work/index.html','about/index.html','legal-access/index.html','experiments/index.html'];
+const pagePaths = ['index.html','work/index.html','about/index.html','legal-access/index.html','experiments/index.html','chess/index.html'];
 test('every page has one H1, canonical, matched mobile routes, and the new portrait metadata', () => {
  for (const file of pagePaths) {
   const page = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
@@ -161,19 +167,29 @@ test('all local navigation, scripts, stylesheets and images resolve', () => {
  }
 });
 test('homepage is focused and interactions live on their real destinations', () => {
- assert.match(home,/id="chessBoard"/); assert.doesNotMatch(home,/id="legalDeck"/); assert.ok(home.indexOf('id="chess"')>home.indexOf('id="contact"')); assert.match(home,/dctpa-preview.jpg/); assert.doesNotMatch(home,/→/);
- assert.match(experiments,/id="chessBoard"/);assert.match(legal,/id="legalDeck"/);
+ assert.doesNotMatch(home,/id="chessBoard"|id="legalDeck"/); assert.match(home,/Test Your IQ With My Custom Test/); assert.match(home,/dctpa-preview.jpg/); assert.doesNotMatch(home,/→/);
+ assert.match(chessPage,/id="chessBoard"/);assert.match(legal,/id="legalDeck"/);
  assert.match(css,/\.intro-portrait img\{width:100%;height:auto;aspect-ratio:/);
  assert.match(home,/<img[^>]*alt="Titus Paine"[^>]*width="1145"[^>]*height="1374"/);
  assert.ok(fs.statSync(path.join(__dirname,'../assets/titus-paine-portrait.jpg')).size<300000);
 });
 
 test('chess pieces explicitly request text presentation rather than emoji', () => {
- assert.ok(experiments.includes(String.raw`sp.textContent=glyph[p]+'\uFE0E';`));
+ assert.ok(scripts[1].includes(String.raw`sp.textContent=glyph[p]+'\uFE0E';`));
 });
 
-test('home chess uses the same tested program and engine as experiments',()=>{assert.deepEqual(inline(home),inline(experiments)); assert.match(home,/chess.js\/0.10.3/);});
+test('dedicated chess route loads tested game and engine',()=>{assert.match(chessPage,/src="\/chess.js"/);assert.match(chessPage,/chess.js\/0.10.3/);});
 
-test('editorial overrides follow interactive base styles on every interactive page',()=>{for(const page of [home,legal,experiments])assert.ok(page.indexOf('href="/interactive.css"')<page.indexOf('href="/editorial.css"'));});
+test('editorial overrides follow interactive base styles on every interactive page',()=>{for(const page of [chessPage,legal,experiments])assert.ok(page.indexOf('href="/interactive.css"')<page.indexOf('href="/editorial.css"'));});
 
 test('removed decorative arrows leave no positional last-child selectors',()=>{assert.doesNotMatch(css,/\.route-strip a span:last-child|\.work-line>span:last-child|\.experiment-list>a>span:last-child/);});
+
+for (const ending of [{ended:true,mate:true},{ended:true,mate:false},{ended:false,mate:false}]) test('one playful result per game '+JSON.stringify(ending),()=>{
+ const loc={location:{href:''}};let calls=0;const c=chess({...ending,window:loc,math:Object.assign(Object.create(Math),{random:()=>{calls++;return .5;}})});
+ c.nodes.get('playChess').onclick();c.nodes.get('chessControls').querySelectorAll('[data-side]')[0].onclick();
+ if(ending.ended){const b=c.nodes.get('chessBoard');b.querySelector('[data-sq="e2"]').onclick();b.querySelector('[data-sq="e4"]').onclick();}else c.nodes.get('endChessGame').onclick();
+ assert.equal(calls,1);assert.ok(c.nodes.get('chessOverlay').classList.contains('show'));c.nodes.get('endChessGame').onclick();assert.equal(calls,1);
+ c.nodes.get('againNo').onclick();assert.equal(loc.location.href,'');c.nodes.get('prankContinue').onclick();assert.equal(loc.location.href,'/');c.nodes.get('againYes').onclick();c.nodes.get('prankContinue').onclick();assert.ok(!c.nodes.get('chessOverlay').classList.contains('show'));assert.match(c.nodes.get('chessStatus').textContent,/CHOOSE YOUR SIDE/);
+ c.nodes.get('chessControls').querySelectorAll('[data-side]')[0].onclick();c.nodes.get('endChessGame').onclick();assert.equal(calls,2);
+});
+test('random score bounds and clear fictional disclosure',()=>{assert.match(scripts[1],/70\+Math.floor\(Math.random\(\)\*41\)/);assert.match(scripts[1],/not an IQ measurement/);assert.match(scripts[1],/136 is part of the joke/);assert.match(scripts[1],/revealPrank\('again'\)/);assert.match(scripts[1],/revealPrank\('exit'\)/);});
