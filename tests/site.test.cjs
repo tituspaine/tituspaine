@@ -150,6 +150,7 @@ test('identity, portrait, canonical and usable no-JavaScript paths are present',
   assert.match(html, /rel="canonical" href="https:\/\/tituspaine.com\/"/);
   assert.match(html, /class="skip-link" href="#top"/);
   assert.match(html, /<img[^>]*alt="Titus Paine"[^>]*width="1254"[^>]*height="1254"/);
+  assert.match(css, /\.portrait img\{width:100%;height:auto;aspect-ratio:/);
   assert.match(html, /<details class="mobile-menu">/);
   assert.doesNotMatch(html, /user-scalable=no|maximum-scale=1/);
   assert.ok(html.indexOf('id="contact"') > html.indexOf('id="chess"'));
