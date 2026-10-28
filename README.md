@@ -4,10 +4,13 @@ Personal portfolio at https://tituspaine.com. The `main` branch is the personal 
 
 ## Structure
 
-- `index.html`: semantic content, metadata, LegalShield cards, and chess interaction.
+- `index.html`: founder homepage, authentic selected-project previews, metadata, and playable chess at the bottom.
+- `work/`, `about/`, `legal-access/`, `experiments/`: complete destination pages.
+- `interactive.css`: shared LegalShield/chess styles; `site.js`: mobile navigation and reading progress.
 - `editorial.css`: responsive editorial design and reduced-motion/accessibility rules.
-- `titus-headshot.png`: existing portrait (unchanged).
-- `robots.txt` / `sitemap.xml`: homepage discovery.
+- `assets/titus-paine-portrait.jpg`: user-approved replacement portrait, also used in social metadata.
+- `assets/wet1d-preview.png`, `assets/dctpa-preview.jpg`: genuine public website captures.
+- `robots.txt` / `sitemap.xml`: five-page discovery.
 - `tests/site.test.cjs`: dependency-free regression tests.
 
 Run `node --test tests/*.test.cjs` with Node 22 or newer. No frontend build or package installation is needed. Preserve the existing hosting connection and production branch. `wrangler.jsonc` describes a static-assets Worker if Cloudflare deploys this repository; GitHub Pages deployment is also enabled in the repository.

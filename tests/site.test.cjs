@@ -3,9 +3,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
-const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
-const css = fs.readFileSync(path.join(__dirname, '../editorial.css'), 'utf8');
-const scripts = [...html.matchAll(/<script(?![^>]*type="application\/ld\+json")(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x => x[1]).filter(Boolean);
+const home = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+const legal = fs.readFileSync(path.join(__dirname, '../legal-access/index.html'), 'utf8');
+const experiments = fs.readFileSync(path.join(__dirname, '../experiments/index.html'), 'utf8');
+const html = home + legal + experiments;
+const css = fs.readFileSync(path.join(__dirname, '../editorial.css'), 'utf8') + fs.readFileSync(path.join(__dirname, '../interactive.css'), 'utf8');
+const inline = value => [...value.matchAll(/<script(?![^>]*type="application\/ld\+json")(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x => x[1]).filter(Boolean);
+const scripts = [fs.readFileSync(path.join(__dirname, '../site.js'), 'utf8'), ...inline(experiments), ...inline(legal)];
 
 function dom() {
   const nodes = new Map();
@@ -79,7 +83,7 @@ test('legal drag uses unitless distance with dimensionally valid CSS transforms'
   deck.events.pointerdown({ target: deck, clientX: 200, pointerId: 1 });
   deck.events.pointermove({ clientX: 100 });
   assert.equal(cards[0].style.getPropertyValue('--drag'), '-100');
-  assert.match(html, /translate3d\(calc\(var\(--drag\) \* 1px\),0,0\)/);
+  assert.match(css, /translate3d\(calc\(var\(--drag\) \* 1px\),0,0\)/);
   deck.events.pointerup();
   assert.equal(nodes.get('legalCount').textContent, '02 / 05');
 });
@@ -133,43 +137,43 @@ test('status and reduced-motion semantics are present', () => {
   assert.match(css, /prefers-reduced-motion:reduce\)\{\*\{animation:none!important;transition:none!important/);
 });
 
-test('editorial navigation has mobile parity and every local destination exists', () => {
-  const menus = [...html.matchAll(/<nav[^>]*>([\s\S]*?)<\/nav>/g)].map(m => [...m[1].matchAll(/href="([^"]+)"/g)].map(x => x[1]));
-  assert.equal(menus.length, 2);
-  assert.deepEqual(menus[0], menus[1]);
-  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
-  const ids = [...markup.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(ids.length, new Set(ids).size, 'DOM IDs are unique');
-  for (const [, target] of html.matchAll(/href="#([^"]+)"/g)) assert.ok(ids.includes(target), target);
-  for (const target of ['#ventures','#builds','#about','#code','#legal-access','#fun-projects','#contact']) assert.ok(menus[0].includes(target));
+const pagePaths = ['index.html','work/index.html','about/index.html','legal-access/index.html','experiments/index.html'];
+test('every page has one H1, canonical, matched mobile routes, and the new portrait metadata', () => {
+ for (const file of pagePaths) {
+  const page = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+  assert.equal((page.match(/<h1\b/g)||[]).length, 1, file);
+  assert.match(page, /rel="canonical" href="https:\/\/tituspaine.com/);
+  assert.match(page, /property="og:image" content="https:\/\/tituspaine.com\/assets\/titus-paine-portrait.jpg"/);
+  assert.match(page, /name="twitter:image" content="https:\/\/tituspaine.com\/assets\/titus-paine-portrait.jpg"/);
+  assert.doesNotMatch(page, /titus-headshot.png|user-scalable=no|maximum-scale=1/);
+  const menus=[...page.matchAll(/<nav[^>]*>([\s\S]*?)<\/nav>/g)].map(m=>[...m[1].matchAll(/href="([^"]+)"/g)].map(x=>x[1]));
+  assert.equal(menus.length,2,file); assert.deepEqual(menus[0],menus[1],file);
+  for(const route of ['/work/','/about/','/legal-access/','/experiments/','mailto:contact@tituspaine.com'])assert.ok(menus[0].includes(route),file+route);
+ }
+});
+test('all local navigation, scripts, stylesheets and images resolve', () => {
+ for (const file of pagePaths) {
+  const page=fs.readFileSync(path.join(__dirname,'..',file),'utf8');
+  for(const [,url] of page.matchAll(/(?:href|src)="(\/[^\"]*)"/g)){
+   const clean=url.split('#')[0].split('?')[0];const target=path.join(__dirname,'..',clean.endsWith('/')?clean+'index.html':clean);
+   assert.ok(fs.existsSync(target),file+' -> '+url);
+  }
+ }
+});
+test('homepage is focused and interactions live on their real destinations', () => {
+ assert.match(home,/id="chessBoard"/); assert.doesNotMatch(home,/id="legalDeck"/); assert.ok(home.indexOf('id="chess"')>home.indexOf('id="contact"')); assert.match(home,/dctpa-preview.jpg/); assert.doesNotMatch(home,/→/);
+ assert.match(experiments,/id="chessBoard"/);assert.match(legal,/id="legalDeck"/);
+ assert.match(css,/\.intro-portrait img\{width:100%;height:auto;aspect-ratio:/);
+ assert.match(home,/<img[^>]*alt="Titus Paine"[^>]*width="1145"[^>]*height="1374"/);
+ assert.ok(fs.statSync(path.join(__dirname,'../assets/titus-paine-portrait.jpg')).size<300000);
 });
 
-test('identity, portrait, canonical and usable no-JavaScript paths are present', () => {
-  assert.equal((html.match(/<h1\b/g) || []).length, 1);
-  assert.match(html, /<h1 id="intro-title">Titus Russell/);
-  assert.match(html, /rel="canonical" href="https:\/\/tituspaine.com\/"/);
-  assert.match(html, /class="skip-link" href="#top"/);
-  assert.match(html, /<img[^>]*alt="Titus Paine"[^>]*width="1254"[^>]*height="1254"/);
-  assert.match(css, /\.portrait img\{width:100%;height:auto;aspect-ratio:/);
-  assert.match(html, /<details class="mobile-menu">/);
-  assert.doesNotMatch(html, /user-scalable=no|maximum-scale=1/);
-  assert.ok(html.indexOf('id="contact"') > html.indexOf('id="chess"'));
-  for (const host of ['orendrix.com','wet1d.com','dcotaxpayers.com','rrbible.com','github.com/tituspaine/os-oracle','tituspaine.legalshieldassociate.com','doublephone.tituspaine.com','tituspaine.github.io/Daily/']) assert.ok(html.includes(host), host);
+test('chess pieces explicitly request text presentation rather than emoji', () => {
+ assert.ok(experiments.includes(String.raw`sp.textContent=glyph[p]+'\uFE0E';`));
 });
 
-test('search metadata describes the real person and only the real homepage', () => {
-  const data = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
-  assert.equal(data['@type'], 'Person');
-  assert.equal(data.name, 'Titus Paine');
-  assert.equal(data.url, 'https://tituspaine.com/');
-  const sitemap = fs.readFileSync(path.join(__dirname, '../sitemap.xml'), 'utf8');
-  assert.match(sitemap, /<loc>https:\/\/tituspaine.com\/<\/loc>/);
-  assert.doesNotMatch(sitemap, /intel|legal-access|chess/);
-});
+test('home chess uses the same tested program and engine as experiments',()=>{assert.deepEqual(inline(home),inline(experiments)); assert.match(home,/chess.js\/0.10.3/);});
 
-test('project grid class matches responsive stylesheet', () => {
-  assert.match(html, /class="build-grid"/);
-  assert.match(css, /\.build-grid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
-  assert.match(css, /\.build-grid\{grid-template-columns:1fr\}/);
-  assert.doesNotMatch(css, /\.builds-grid/);
-});
+test('editorial overrides follow interactive base styles on every interactive page',()=>{for(const page of [home,legal,experiments])assert.ok(page.indexOf('href="/interactive.css"')<page.indexOf('href="/editorial.css"'));});
+
+test('removed decorative arrows leave no positional last-child selectors',()=>{assert.doesNotMatch(css,/\.route-strip a span:last-child|\.work-line>span:last-child|\.experiment-list>a>span:last-child/);});
