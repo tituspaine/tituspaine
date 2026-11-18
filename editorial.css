@@ -17,3 +17,7 @@
 .iq-invitation{padding-top:64px;padding-bottom:80px;border-top:1px solid var(--line)}.iq-invitation h2{font-size:clamp(32px,4vw,54px);margin:15px 0}.iq-invitation p:not(.eyebrow){max-width:590px;line-height:1.7;color:var(--muted);margin:20px 0}.iq-invitation .button{white-space:normal;text-align:center;max-width:100%}.chess-overlay.show{position:fixed;inset:0;z-index:1500;overflow:auto;padding:24px;background:rgba(0,0,0,.85)}.chess-card{max-height:90vh;overflow:auto}.chess-card .play-disclaimer{font-size:13px;color:#e3d8be;line-height:1.6}.chess-card .iq-score{font-size:64px;color:#ffda7e;margin:18px 0}.chess-card p{line-height:1.6}.display-record{margin-top:20px}
 
 .chess-overlay .chess-card{width:min(560px,100%);padding:32px;background:#0c1119;border:1px solid #a98d4d;text-align:center;color:#f8f5ee}.chess-overlay .chess-result{font-family:Arial,sans-serif;font-size:clamp(24px,5vw,36px);line-height:1.15}.chess-overlay .chess-card p{font-family:Arial,sans-serif;font-size:15px}.chess-overlay .chess-card .iq-score{font-size:64px}
+
+/* Circular portrait treatment: transparent outer edge blends into the page. */
+.intro-portrait,.bio-image{border-radius:50%;overflow:hidden;background:transparent;aspect-ratio:1;align-self:center}
+.intro-portrait img,.bio-image img{width:100%;height:auto;aspect-ratio:1;object-fit:cover;object-position:50% 27%;border-radius:50%;-webkit-mask-image:radial-gradient(circle closest-side,#000 89%,transparent 100%);mask-image:radial-gradient(circle closest-side,#000 89%,transparent 100%)}

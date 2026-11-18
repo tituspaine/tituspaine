@@ -149,8 +149,8 @@ test('every page has one H1, canonical, matched mobile routes, and the new portr
   const page = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
   assert.equal((page.match(/<h1\b/g)||[]).length, 1, file);
   assert.match(page, /rel="canonical" href="https:\/\/tituspaine.com/);
-  assert.match(page, /property="og:image" content="https:\/\/tituspaine.com\/assets\/titus-paine-portrait.jpg"/);
-  assert.match(page, /name="twitter:image" content="https:\/\/tituspaine.com\/assets\/titus-paine-portrait.jpg"/);
+  assert.match(page, /property="og:image" content="https:\/\/tituspaine.com\/assets\/titus-paine-portrait.jpg\?v=20261118"/);
+  assert.match(page, /name="twitter:image" content="https:\/\/tituspaine.com\/assets\/titus-paine-portrait.jpg\?v=20261118"/);
   assert.doesNotMatch(page, /titus-headshot.png|user-scalable=no|maximum-scale=1/);
   const menus=[...page.matchAll(/<nav[^>]*>([\s\S]*?)<\/nav>/g)].map(m=>[...m[1].matchAll(/href="([^"]+)"/g)].map(x=>x[1]));
   assert.equal(menus.length,2,file); assert.deepEqual(menus[0],menus[1],file);
@@ -170,7 +170,7 @@ test('homepage is focused and interactions live on their real destinations', () 
  assert.doesNotMatch(home,/id="chessBoard"|id="legalDeck"/); assert.match(home,/Test Your IQ With My Custom Test/); assert.match(home,/dctpa-preview.jpg/); assert.doesNotMatch(home,/→/);
  assert.match(chessPage,/id="chessBoard"/);assert.match(legal,/id="legalDeck"/);
  assert.match(css,/\.intro-portrait img\{width:100%;height:auto;aspect-ratio:/);
- assert.match(home,/<img[^>]*alt="Titus Paine"[^>]*width="1145"[^>]*height="1374"/);
+ assert.match(home,/<img[^>]*alt="Titus Paine"[^>]*width="1086"[^>]*height="1448"/);
  assert.ok(fs.statSync(path.join(__dirname,'../assets/titus-paine-portrait.jpg')).size<300000);
 });
 
@@ -180,7 +180,7 @@ test('chess pieces explicitly request text presentation rather than emoji', () =
 
 test('dedicated chess route loads tested game and engine',()=>{assert.match(chessPage,/src="\/chess.js"/);assert.match(chessPage,/chess.js\/0.10.3/);});
 
-test('editorial overrides follow interactive base styles on every interactive page',()=>{for(const page of [chessPage,legal,experiments])assert.ok(page.indexOf('href="/interactive.css"')<page.indexOf('href="/editorial.css"'));});
+test('editorial overrides follow interactive base styles on every interactive page',()=>{for(const page of [chessPage,legal,experiments])assert.ok(page.indexOf('href="/interactive.css"')<page.indexOf('href="/editorial.css?v=20261118"'));});
 
 test('removed decorative arrows leave no positional last-child selectors',()=>{assert.doesNotMatch(css,/\.route-strip a span:last-child|\.work-line>span:last-child|\.experiment-list>a>span:last-child/);});
 
@@ -193,3 +193,12 @@ for (const ending of [{ended:true,mate:true},{ended:true,mate:false},{ended:fals
  c.nodes.get('chessControls').querySelectorAll('[data-side]')[0].onclick();c.nodes.get('endChessGame').onclick();assert.equal(calls,2);
 });
 test('random score bounds and clear fictional disclosure',()=>{assert.match(scripts[1],/70\+Math.floor\(Math.random\(\)\*41\)/);assert.match(scripts[1],/This score is randomly generated\./);assert.doesNotMatch(scripts[1],/Just a prank|136 is part of the joke/);assert.match(scripts[1],/revealPrank\('again'\)/);assert.match(scripts[1],/revealPrank\('exit'\)/);});
+
+test('portrait treatment is round and feathered on both visible photo placements',()=>{
+ assert.match(css,/\.intro-portrait img,\.bio-image img\{[^}]*aspect-ratio:1;[^}]*border-radius:50%;[^}]*mask-image:radial-gradient/);
+ for(const file of pagePaths) {
+  const page=fs.readFileSync(path.join(__dirname,'..',file),'utf8');
+  assert.match(page,/rel="icon" href="\/assets\/portrait-icon.svg\?v=20261118"/);
+ }
+ assert.match(fs.readFileSync(path.join(__dirname,'../assets/portrait-icon.svg'),'utf8'),/<circle cx="128" cy="128" r="126"/);
+});

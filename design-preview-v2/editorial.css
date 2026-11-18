@@ -10,3 +10,7 @@
 .legal-deck-controls>span{font-size:11px;color:#c7cfd9;letter-spacing:.5px}
 
 .chess-piece{font-family:'DejaVu Sans','Arial Unicode MS','Segoe UI Symbol',sans-serif;font-variant-emoji:text}
+
+/* Circular portrait treatment: transparent outer edge blends into the page. */
+.intro-portrait,.bio-image{border-radius:50%;overflow:hidden;background:transparent;aspect-ratio:1;align-self:center}
+.intro-portrait img,.bio-image img{width:100%;height:auto;aspect-ratio:1;object-fit:cover;object-position:50% 27%;border-radius:50%;-webkit-mask-image:radial-gradient(circle closest-side,#000 89%,transparent 100%);mask-image:radial-gradient(circle closest-side,#000 89%,transparent 100%)}
